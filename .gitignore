@@ -1,0 +1,11 @@
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+.DS_Store
+.env*.local
+*.log
+
+# 本地视觉验证产物（截图 / 临时浏览器 profile），不入库
+.preview/
