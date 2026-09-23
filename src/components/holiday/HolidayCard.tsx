@@ -1,6 +1,7 @@
 'use client';
 
 import { ImageDown } from 'lucide-react';
+import type { CSSProperties } from 'react';
 import { FlipClock } from '@/components/countdown/FlipClock';
 import { SpotlightCard } from '@/components/reactbits/SpotlightCard';
 import { useI18n } from '@/i18n';
@@ -60,34 +61,33 @@ export function HolidayCard({
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             {/*
-              节日名做成彩色的标签，颜色取自 lib/holidays/accents.ts。
+              节日名做成彩色的标签，色相取自 lib/holidays/accents.ts。
               放在最前面是为了扫读顺序：先知道是哪个节，再看状态。
+
+              色相以 `--ha` 传进 CSS，而不是在这里直接写内联颜色：
+              这套色相是按深色底选的，放到奶油底上几乎读不出来，
+              需要 CSS 层用 color-mix 往近黑压一档。见 globals.css 的 .holiday-pill。
             */}
             <span
-              className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] leading-none"
-              style={{
-                borderColor: `${accent}44`,
-                backgroundColor: `${accent}1a`,
-                color: accent,
-              }}
+              className="holiday-pill inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[calc(11px*var(--fs-scale))] leading-none"
+              style={{ '--ha': accent } as CSSProperties}
             >
               <span
-                className="h-1.5 w-1.5 rounded-full"
-                style={{ backgroundColor: accent }}
+                className="holiday-pill__dot h-1.5 w-1.5 rounded-full"
                 aria-hidden="true"
               />
               {name}
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-tag-holiday/30 bg-tag-holiday/10 px-2.5 py-1 text-[11px] leading-none text-tag-holiday">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-tag-holiday/30 bg-tag-holiday/10 px-2.5 py-1 text-[calc(11px*var(--fs-scale))] leading-none text-tag-holiday">
               {t('tag.holiday')}
             </span>
-            <span className="rounded-full border border-line px-2 py-0.5 text-[10px] leading-none text-ink-3">
+            <span className="rounded-full border border-line px-2 py-0.5 text-[calc(10px*var(--fs-scale))] leading-none text-ink-3">
               {badgeLabel}
             </span>
             {statusLabel ? (
               <span
                 className={cn(
-                  'inline-flex items-center gap-1.5 text-[11px]',
+                  'inline-flex items-center gap-1.5 text-[calc(11px*var(--fs-scale))]',
                   view.phase === 'ongoing' ? 'text-accent' : 'text-ink-3',
                 )}
               >
@@ -108,18 +108,18 @@ export function HolidayCard({
               onClick={() => onExport(period)}
               aria-label={t('event.export')}
               title={t('event.export')}
-              className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-ink-3 opacity-0 transition-all hover:bg-white/[0.07] hover:text-ink focus-visible:opacity-100 group-hover:opacity-100"
+              className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-ink-3 opacity-0 transition-all hover:bg-surface-3 hover:text-ink focus-visible:opacity-100 group-hover:opacity-100"
             >
               <ImageDown size={12} strokeWidth={1.75} />
             </button>
           ) : null}
         </div>
 
-        <h3 className="mt-3.5 font-display text-[18.5px] leading-snug tracking-tight">
+        <h3 className="mt-3.5 font-display text-[calc(18.5px*var(--fs-scale))] leading-snug tracking-tight">
           {name}
         </h3>
 
-        <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[12px] text-ink-3">
+        <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[calc(12px*var(--fs-scale))] text-ink-3">
           {lunar ? (
             <>
               <span>{lunar}</span>
@@ -133,7 +133,7 @@ export function HolidayCard({
 
         <div className="mt-5 flex-1">
           {view.phase === 'ended' ? (
-            <p className="font-display text-[15px] text-ink-3">{t('status.ended')}</p>
+            <p className="font-display text-[calc(15px*var(--fs-scale))] text-ink-3">{t('status.ended')}</p>
           ) : (
             <FlipClock
               tone="card"
@@ -148,14 +148,14 @@ export function HolidayCard({
             />
           )}
           {view.phase !== 'ended' ? (
-            <p className="mt-3 text-[12.5px] text-ink-3">
+            <p className="mt-3 text-[calc(12.5px*var(--fs-scale))] text-ink-3">
               {formatRelativeDay(period.startMs, nowMs, locale, t)}
             </p>
           ) : null}
         </div>
 
         {period.makeupWorkdays.length > 0 && view.phase !== 'ended' ? (
-          <p className="mt-3.5 border-t border-line pt-3 text-[11px] text-warn">
+          <p className="mt-3.5 border-t border-line pt-3 text-[calc(11px*var(--fs-scale))] text-warn">
             {t('hero.makeupTitle')} ·{' '}
             {period.makeupWorkdays.join(locale === 'zh' ? '、' : ', ')}
           </p>

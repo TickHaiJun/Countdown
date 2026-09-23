@@ -6,6 +6,7 @@ import { StoreHydration } from '@/components/common/StoreHydration';
 import { ShortcutProvider } from '@/components/keyboard/ShortcutProvider';
 import { Backdrop } from '@/components/layout/Backdrop';
 import { I18nProvider } from '@/i18n';
+import { APPEARANCE_BOOTSTRAP } from '@/lib/appearance';
 
 /*
  * 只自托管拉丁子集，中文走系统字体栈（PingFang SC / Microsoft YaHei）。
@@ -52,8 +53,15 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#100e0b',
-  colorScheme: 'dark',
+  /*
+   * 静态导出下 metadata 构建期固化，写死一个中性值即可。
+   * 真正的主题色由 lib/appearance.ts 在客户端改写（含首屏内联脚本那一步）。
+   *
+   * 这里刻意不设 `colorScheme`：它会固化一个 `<meta name="color-scheme">`，
+   * 而 color-scheme 需要跟着主题在两档之间切换——那由 CSS 的
+   * `:root[data-theme='golden'] { color-scheme: light }` 负责。
+   */
+  themeColor: '#000000',
   viewportFit: 'cover',
 };
 
@@ -61,6 +69,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="zh-CN" className={grotesk.variable} suppressHydrationWarning>
       <body>
+        {/*
+          首屏防闪烁：必须在 React 之前、在内容绘制之前，把 <html data-theme>
+          与 --fs-scale 按 localStorage 设好。放在 body 的第一个子节点上——
+          解析到这里时后面的内容还没画出来，所以不会闪。
+          suppressHydrationWarning 已加在 <html> 上，覆盖这几个属性差异。
+        */}
+        <script dangerouslySetInnerHTML={{ __html: APPEARANCE_BOOTSTRAP }} />
         <I18nProvider>
           <StoreHydration />
           <ShortcutProvider />

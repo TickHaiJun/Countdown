@@ -54,12 +54,12 @@ export function ShortcutHelpDialog({
               <dl className="flex flex-col gap-2">
                 {group.items.map((item) => (
                   <div key={item.label} className="flex items-center justify-between gap-4">
-                    <dt className="text-[12px] text-[var(--color-ink-2)]">{item.label}</dt>
+                    <dt className="text-[calc(12px*var(--fs-scale))] text-[var(--color-ink-2)]">{item.label}</dt>
                     <dd className="flex items-center gap-1">
                       {item.keys.map((key) => (
                         <kbd
                           key={key}
-                          className="tnum rounded-[6px] border border-white/[0.12] bg-white/[0.05] px-2 py-0.5 text-[11px] text-[var(--color-ink)]"
+                          className="tnum rounded-[6px] border border-hairline-strong bg-surface-3 px-2 py-0.5 text-[calc(11px*var(--fs-scale))] text-[var(--color-ink)]"
                         >
                           {key}
                         </kbd>

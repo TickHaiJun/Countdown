@@ -33,7 +33,7 @@ function StatBlock({ label, value }: { label: string; value: number }) {
       <CountUp
         to={value}
         duration={1.4}
-        className="font-display text-[28px] leading-none text-ink"
+        className="font-display text-[calc(28px*var(--fs-scale))] leading-none text-ink"
       />
       <p className="label-mono mt-1.5">{label}</p>
     </div>
@@ -51,11 +51,11 @@ function SectionHeading({
 }) {
   return (
     <div className="mb-4 flex items-baseline gap-3">
-      <h2 className="font-display text-[19px] tracking-tight text-ink">{title}</h2>
+      <h2 className="font-display text-[calc(19px*var(--fs-scale))] tracking-tight text-ink">{title}</h2>
       {typeof count === 'number' ? (
-        <span className="font-mono text-[11px] text-ink-3">{count}</span>
+        <span className="font-mono text-[calc(11px*var(--fs-scale))] text-ink-3">{count}</span>
       ) : null}
-      {hint ? <span className="ml-auto text-[11.5px] text-ink-3">{hint}</span> : null}
+      {hint ? <span className="ml-auto text-[calc(11.5px*var(--fs-scale))] text-ink-3">{hint}</span> : null}
     </div>
   );
 }
@@ -158,7 +158,7 @@ export function CountdownsBoard() {
       {/* 页头 */}
       <section className="page-x pt-10 md:pt-16">
         <h1 className="display-lg text-ink">{t('countdowns.title')}</h1>
-        <p className="mt-3 max-w-xl text-[13.5px] leading-relaxed text-ink-2">
+        <p className="mt-3 max-w-xl text-[calc(13.5px*var(--fs-scale))] leading-relaxed text-ink-2">
           {t('countdowns.subtitle')}
         </p>
 
@@ -190,14 +190,14 @@ export function CountdownsBoard() {
               onChange={(event) => setQuery(event.target.value)}
               placeholder={t('countdowns.searchPlaceholder')}
               aria-label={t('common.search')}
-              className="h-10 w-full rounded-full border border-line bg-white/[0.03] pl-9 pr-9 text-[13px] text-ink placeholder:text-ink-3 focus:border-accent/40 focus:outline-none"
+              className="h-10 w-full rounded-full border border-line bg-surface-2 pl-9 pr-9 text-[calc(13px*var(--fs-scale))] text-ink placeholder:text-ink-3 focus:border-accent/40 focus:outline-none"
             />
             {query ? (
               <button
                 type="button"
                 onClick={() => setQuery('')}
                 aria-label={t('common.clear')}
-                className="absolute right-3 top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center rounded-full text-ink-3 hover:bg-white/[0.07] hover:text-ink"
+                className="absolute right-3 top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center rounded-full text-ink-3 hover:bg-surface-3 hover:text-ink"
               >
                 <X size={11} strokeWidth={2} />
               </button>
@@ -227,7 +227,7 @@ export function CountdownsBoard() {
                     onClick={() => toggleTag(tag)}
                     aria-pressed={active}
                     className={cn(
-                      'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] transition-colors',
+                      'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[calc(12px*var(--fs-scale))] transition-colors',
                       active
                         ? 'border-transparent text-accent-ink'
                         : 'border-line text-ink-2 hover:text-ink',
@@ -307,11 +307,11 @@ export function CountdownsBoard() {
       <section className="page-x mt-14">
         <SectionHeading title={t('countdowns.sectionMine')} count={upcomingEvents.length} />
         {upcomingEvents.length === 0 ? (
-          <div className="rounded-card border border-dashed border-line bg-white/[0.012] px-6 py-12 text-center">
-            <p className="text-[13px] text-ink-2">
+          <div className="rounded-card border border-dashed border-line bg-surface-1 px-6 py-12 text-center">
+            <p className="text-[calc(13px*var(--fs-scale))] text-ink-2">
               {query || activeTags.length > 0 ? t('countdowns.searchEmpty') : t('countdowns.emptyAll')}
             </p>
-            <p className="mt-1.5 text-[12px] text-ink-3">
+            <p className="mt-1.5 text-[calc(12px*var(--fs-scale))] text-ink-3">
               {query || activeTags.length > 0
                 ? t('countdowns.searchEmptyHint')
                 : t('countdowns.emptyAllHint')}

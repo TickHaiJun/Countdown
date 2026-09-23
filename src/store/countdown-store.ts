@@ -3,10 +3,16 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { createDebouncedStorage } from '@/store/debounced-storage';
+import { STORAGE_KEY } from '@/lib/storage-keys';
 import type { CountdownEvent, Settings } from '@/types';
 import { DEFAULT_SETTINGS } from '@/types';
 
-export const STORAGE_KEY = 'countdown:v1';
+/*
+ * 键名本体放在 @/lib/storage-keys（中性模块）——本模块带 'use client'，
+ * 服务端组件跨这条边界读非组件导出会拿到 undefined。这里只做再导出，
+ * 让既有引用方（含单测）保持不变。
+ */
+export { STORAGE_KEY };
 export const SCHEMA_VERSION = 1;
 
 export interface TrashItem {

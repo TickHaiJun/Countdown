@@ -74,11 +74,11 @@ export function ServiceWorkerRegister() {
       className="fixed bottom-5 left-1/2 z-[70] flex -translate-x-1/2 items-center gap-3 rounded-full border border-line bg-elev/95 px-4 py-2.5 shadow-[0_8px_32px_rgba(0,0,0,0.45)] backdrop-blur-xl"
       role="status"
     >
-      <span className="text-[12px] text-ink-2">{t('common.updateAvailable')}</span>
+      <span className="text-[calc(12px*var(--fs-scale))] text-ink-2">{t('common.updateAvailable')}</span>
       <button
         type="button"
         onClick={reload}
-        className="inline-flex items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-[12px] font-medium text-accent-ink transition-colors hover:brightness-110"
+        className="inline-flex items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-[calc(12px*var(--fs-scale))] font-medium text-accent-ink transition-colors hover:brightness-110"
       >
         <RefreshCw size={13} strokeWidth={2} />
         {t('common.refresh')}
@@ -88,7 +88,7 @@ export function ServiceWorkerRegister() {
         onClick={() => setDismissed(true)}
         aria-label={t('common.later')}
         title={t('common.later')}
-        className="rounded-full p-1 text-ink-3 transition-colors hover:bg-white/[0.06] hover:text-ink"
+        className="rounded-full p-1 text-ink-3 transition-colors hover:bg-surface-3 hover:text-ink"
       >
         <X size={13} strokeWidth={1.75} />
       </button>

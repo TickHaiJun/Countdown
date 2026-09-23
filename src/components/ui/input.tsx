@@ -4,7 +4,7 @@ import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const FIELD_BASE =
-  'w-full rounded-control border border-line bg-white/[0.03] text-[13px] text-ink placeholder:text-ink-3 transition-colors focus:border-accent/45 focus:bg-white/[0.05] focus:outline-none disabled:opacity-45';
+  'w-full rounded-control border border-line bg-surface-2 text-[calc(13px*var(--fs-scale))] text-ink placeholder:text-ink-3 transition-colors focus:border-accent/45 focus:bg-surface-3 focus:outline-none disabled:opacity-45';
 
 export function Input({ className, ...props }: React.ComponentProps<'input'>) {
   return <input className={cn(FIELD_BASE, 'h-10 px-3.5', className)} {...props} />;
@@ -22,7 +22,7 @@ export function Textarea({ className, ...props }: React.ComponentProps<'textarea
 export function Label({ className, ...props }: React.ComponentProps<'label'>) {
   return (
     <label
-      className={cn('block text-[12px] font-medium text-ink-2', className)}
+      className={cn('block text-[calc(12px*var(--fs-scale))] font-medium text-ink-2', className)}
       {...props}
     />
   );
@@ -79,7 +79,7 @@ export function Field({
     <div className={cn('space-y-1.5', className)}>
       <Label htmlFor={htmlFor}>{label}</Label>
       {children}
-      {hint ? <p className="text-[11px] leading-relaxed text-ink-3">{hint}</p> : null}
+      {hint ? <p className="text-[calc(11px*var(--fs-scale))] leading-relaxed text-ink-3">{hint}</p> : null}
     </div>
   );
 }
@@ -103,7 +103,7 @@ export function SegmentedControl<T extends string>({
       role="radiogroup"
       aria-label={ariaLabel}
       className={cn(
-        'inline-flex items-center gap-0.5 rounded-control border border-line bg-white/[0.03] p-0.5',
+        'inline-flex items-center gap-0.5 rounded-control border border-line bg-surface-2 p-0.5',
         className,
       )}
     >
@@ -117,10 +117,10 @@ export function SegmentedControl<T extends string>({
             aria-checked={active}
             onClick={() => onChange(option.value)}
             className={cn(
-              'rounded-[7px] px-3 py-1.5 text-[12px] font-medium transition-colors',
+              'rounded-[7px] px-3 py-1.5 text-[calc(12px*var(--fs-scale))] font-medium transition-colors',
               active
                 ? 'bg-accent text-accent-ink'
-                : 'text-ink-2 hover:bg-white/[0.06] hover:text-ink',
+                : 'text-ink-2 hover:bg-surface-3 hover:text-ink',
             )}
           >
             {option.label}

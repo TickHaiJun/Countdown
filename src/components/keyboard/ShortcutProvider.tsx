@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useIsMobile } from '@/hooks/use-media-query';
+import { useI18n } from '@/i18n';
 import { BUILTIN_INDEX, findCurrentOrNext } from '@/lib/holidays';
 import { useCountdownStore } from '@/store/countdown-store';
 import { useUiStore } from '@/store/ui-store';
@@ -47,6 +48,7 @@ export function ShortcutProvider() {
   const router = useRouter();
   const pathname = usePathname();
   const isMobile = useIsMobile();
+  const { t } = useI18n();
 
   const composerOpen = useUiStore((state) => state.composerOpen);
   const exportTarget = useUiStore((state) => state.exportTarget);
@@ -207,14 +209,12 @@ export function ShortcutProvider() {
       >
         <DialogContent className="w-[min(400px,calc(100vw-24px))]">
           <DialogHeader>
-            <DialogTitle>删除这个事件？</DialogTitle>
-            <DialogDescription>
-              删除后会进入回收站，可在设置页还原；回收站保留 30 天。
-            </DialogDescription>
+            <DialogTitle>{t('event.deleteTitle')}</DialogTitle>
+            <DialogDescription>{t('event.deleteBody')}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="ghost" size="md" onClick={() => setPendingDelete(null)}>
-              取消
+              {t('common.cancel')}
             </Button>
             <Button
               variant="danger"
@@ -225,7 +225,7 @@ export function ShortcutProvider() {
                 setPendingDelete(null);
               }}
             >
-              删除
+              {t('event.delete')}
             </Button>
           </DialogFooter>
         </DialogContent>

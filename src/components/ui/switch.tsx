@@ -11,7 +11,7 @@ export function Switch({
     <SwitchPrimitive.Root
       className={cn(
         'relative inline-flex h-[22px] w-[40px] shrink-0 cursor-pointer items-center rounded-full border border-line transition-colors',
-        'data-[state=unchecked]:bg-white/[0.05]',
+        'data-[state=unchecked]:bg-surface-3',
         'data-[state=checked]:border-accent/50 data-[state=checked]:bg-accent/25',
         'disabled:cursor-not-allowed disabled:opacity-45',
         className,

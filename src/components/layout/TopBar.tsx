@@ -78,15 +78,15 @@ export function TopBar() {
         >
           <span className="relative grid h-7 w-7 place-items-center rounded-[9px] border border-accent/30 bg-accent/10">
             <span className="h-2 w-2 rounded-full bg-accent" />
-            <span className="absolute inset-0 rounded-[9px] ring-1 ring-inset ring-white/5" />
+            <span className="absolute inset-0 rounded-[9px] ring-1 ring-inset ring-hairline-soft" />
           </span>
           <ShinyText
             text="COUNTDOWN"
             speed={4.5}
-            color="#a1a1aa"
-            shineColor="#f4f4f5"
+            color="var(--color-ink-3)"
+            shineColor="var(--color-ink)"
             spread={110}
-            className="font-display text-[13px] font-medium tracking-[0.22em]"
+            className="font-display text-[calc(13px*var(--fs-scale))] font-medium tracking-[0.22em]"
           />
         </Link>
 
@@ -100,10 +100,10 @@ export function TopBar() {
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] transition-colors',
+                  'flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[calc(13px*var(--fs-scale))] transition-colors',
                   active
-                    ? 'bg-white/[0.07] text-ink'
-                    : 'text-ink-2 hover:bg-white/[0.04] hover:text-ink',
+                    ? 'bg-surface-4 text-ink'
+                    : 'text-ink-2 hover:bg-surface-3 hover:text-ink',
                 )}
               >
                 <item.Icon size={14} strokeWidth={1.75} />
@@ -126,7 +126,7 @@ export function TopBar() {
                 'grid h-9 w-9 place-items-center rounded-full border transition-colors',
                 privacyMode
                   ? 'border-accent/40 bg-accent/12 text-accent'
-                  : 'border-transparent text-ink-2 hover:bg-white/[0.05] hover:text-ink',
+                  : 'border-transparent text-ink-2 hover:bg-surface-3 hover:text-ink',
               )}
             >
               {privacyMode ? (
@@ -143,7 +143,7 @@ export function TopBar() {
               onClick={openSettings}
               aria-label={t('nav.settings')}
               title={t('nav.settings')}
-              className="grid h-9 w-9 place-items-center rounded-full border border-transparent text-ink-2 transition-colors hover:bg-white/[0.05] hover:text-ink"
+              className="grid h-9 w-9 place-items-center rounded-full border border-transparent text-ink-2 transition-colors hover:bg-surface-3 hover:text-ink"
             >
               <Settings size={15} strokeWidth={1.75} />
             </button>

@@ -95,7 +95,7 @@ function Chip({
       title={title}
       aria-pressed={active}
       className={cn(
-        'rounded-full border px-2.5 py-1 text-[11px] transition-colors',
+        'rounded-full border px-2.5 py-1 text-[calc(11px*var(--fs-scale))] transition-colors',
         active
           ? 'border-transparent text-[var(--color-ink)]'
           : 'border-line text-[var(--color-ink-3)] hover:border-white/20',
@@ -403,8 +403,8 @@ function ExportPanel({ target, onClose }: { target: ExportTarget; onClose: () =>
                       : 'border-line hover:border-white/20',
                   )}
                 >
-                  <span className="tnum text-[12px]">{item.label}</span>
-                  <span className="text-[11px] text-[var(--color-ink-3)]">
+                  <span className="tnum text-[calc(12px*var(--fs-scale))]">{item.label}</span>
+                  <span className="text-[calc(11px*var(--fs-scale))] text-[var(--color-ink-3)]">
                     {t(item.hintKey)}
                   </span>
                 </button>
@@ -433,7 +433,7 @@ function ExportPanel({ target, onClose }: { target: ExportTarget; onClose: () =>
               <Chip active={privacy} onClick={() => setPrivacy((prev) => !prev)}>
                 {privacy ? t('export.privacyMasked') : t('export.privacyShown')}
               </Chip>
-              <p className="text-[11px] leading-relaxed text-[var(--color-ink-3)]">
+              <p className="text-[calc(11px*var(--fs-scale))] leading-relaxed text-[var(--color-ink-3)]">
                 {t('export.privacyHint')}
               </p>
             </Field>
@@ -441,7 +441,7 @@ function ExportPanel({ target, onClose }: { target: ExportTarget; onClose: () =>
 
           {status ? (
             <p
-              className="text-[11px] leading-relaxed"
+              className="text-[calc(11px*var(--fs-scale))] leading-relaxed"
               style={{
                 color:
                   status.tone === 'error'

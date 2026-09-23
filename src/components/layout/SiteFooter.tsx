@@ -21,10 +21,10 @@ export function SiteFooter() {
             <span className="h-2 w-2 rounded-full bg-accent" />
           </span>
           <div className="space-y-1">
-            <p className="font-display text-[12px] tracking-[0.22em] text-ink-2">
+            <p className="font-display text-[calc(12px*var(--fs-scale))] tracking-[0.22em] text-ink-2">
               {t('brand.latin').toUpperCase()}
             </p>
-            <p className="text-[11.5px] text-ink-3">{t('footer.tagline')}</p>
+            <p className="text-[calc(11.5px*var(--fs-scale))] text-ink-3">{t('footer.tagline')}</p>
           </div>
         </div>
 

@@ -24,8 +24,12 @@ export default function manifest(): MetadataRoute.Manifest {
     display: 'standalone',
     display_override: ['standalone', 'minimal-ui'],
     orientation: 'any',
-    background_color: '#100e0b',
-    theme_color: '#100e0b',
+    /*
+     * 构建期固化，无法跟随运行时主题，所以取默认主题（grain）的底色。
+     * 收藏到桌面的图标底色用这个值，实际主题色由 <meta name="theme-color"> 客户端改写。
+     */
+    background_color: '#000000',
+    theme_color: '#000000',
     categories: ['utilities', 'lifestyle'],
     icons: [
       {

@@ -36,11 +36,16 @@ export default function FullscreenPage() {
    * 改成底部一个小胶囊，几秒后自动隐去，页面立刻变成干净的常驻展示。
    */
   const [showHint, setShowHint] = useState(true);
+  /*
+   * 依赖里带上 showHint 是为了让提示"再次出现时重新计时"：
+   * 退出原生全屏后提示会回来，这里必须重新起一个 6s 定时器。
+   * 已显示时提前 return，所以不会自激。
+   */
   useEffect(() => {
-    if (entered) return;
+    if (entered || !showHint) return;
     const timer = window.setTimeout(() => setShowHint(false), 6000);
     return () => window.clearTimeout(timer);
-  }, [entered]);
+  }, [entered, showHint]);
 
   /* 目标清单：进行中/未来的假期 + 未结束的事件，按时间排序 */
   const targets = useMemo<Target[]>(() => {
@@ -84,7 +89,37 @@ export default function FullscreenPage() {
     [targets.length],
   );
 
-  /* 键盘：← → 切换，Esc 退出，F 切换全屏 */
+  /* 进入页面即请求全屏；浏览器要求用户手势，所以首屏先给一个点击按钮 */
+  const enterFullscreen = useCallback(async () => {
+    try {
+      await document.documentElement.requestFullscreen?.();
+    } catch {
+      /* 用户或浏览器拒绝时也不影响计时显示 */
+    }
+    /* 被拒绝（无手势 / iframe 策略）时不能置 true，否则提示再也不回来 */
+    setEntered(document.fullscreenElement !== null);
+  }, []);
+
+  const exitFullscreen = useCallback(async () => {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+    } catch {
+      /* 忽略 */
+    }
+  }, []);
+
+  /*
+   * 键盘：← → 切换，Esc 退出原生全屏。
+   *
+   * Esc 的语义与顶栏那个「退出大屏」按钮完全一致：**只退原生全屏，人留在页面上**，
+   * 不会把人踢回首页。这与 `fullscreen.clickHint` 里对用户的承诺对齐。
+   *
+   * 两个必须知道的细节：
+   *  1. 浏览器在原生全屏下会自己吃掉第一次 Esc，keydown 未必传到页面 ——
+   *     所以除了按键分支，还得靠 fullscreenchange 兜住"状态已经变了"。
+   *  2. F 不在这里接：全局快捷键里 F 的语义是"离开大屏页"，
+   *     两处都接会导致按一次 F 同时切全屏 + 跳首页。
+   */
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'ArrowLeft') {
@@ -93,29 +128,24 @@ export default function FullscreenPage() {
       } else if (event.key === 'ArrowRight') {
         event.preventDefault();
         go(1);
+      } else if (event.key === 'Escape') {
+        void exitFullscreen();
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [go]);
+  }, [exitFullscreen, go]);
 
-  /* 进入页面即请求全屏；浏览器要求用户手势，所以首屏先给一个点击遮罩 */
-  const enterFullscreen = async () => {
-    setEntered(true);
-    try {
-      await document.documentElement.requestFullscreen?.();
-    } catch {
-      /* 用户或浏览器拒绝时也不影响计时显示 */
-    }
-  };
-
-  const exitFullscreen = async () => {
-    try {
-      if (document.fullscreenElement) await document.exitFullscreen();
-    } catch {
-      /* 忽略 */
-    }
-  };
+  /* 原生全屏被退掉（Esc / 浏览器 UI / F11）后，把「进入全屏」提示放回来 */
+  useEffect(() => {
+    const onChange = () => {
+      if (document.fullscreenElement) return;
+      setEntered(false);
+      setShowHint(true);
+    };
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
 
   /* 投屏时鼠标不动就隐藏光标，避免一个大箭头压在数字上 */
   const [idle, setIdle] = useState(false);
@@ -160,7 +190,7 @@ export default function FullscreenPage() {
             onClick={exitFullscreen}
             aria-label={t('fullscreen.exit')}
             title={t('fullscreen.exit')}
-            className="grid h-9 w-9 place-items-center rounded-full text-ink-3 transition-colors hover:bg-white/[0.06] hover:text-ink"
+            className="grid h-9 w-9 place-items-center rounded-full text-ink-3 transition-colors hover:bg-surface-3 hover:text-ink"
           >
             <Minimize2 size={15} strokeWidth={1.75} />
           </button>
@@ -168,7 +198,7 @@ export default function FullscreenPage() {
             href="/"
             aria-label={t('nav.home')}
             title={t('nav.home')}
-            className="grid h-9 w-9 place-items-center rounded-full text-ink-3 transition-colors hover:bg-white/[0.06] hover:text-ink"
+            className="grid h-9 w-9 place-items-center rounded-full text-ink-3 transition-colors hover:bg-surface-3 hover:text-ink"
           >
             <MoveHorizontal size={15} strokeWidth={1.75} />
           </Link>
@@ -223,7 +253,7 @@ export default function FullscreenPage() {
 
           {view.phase === 'ongoing' ? (
             <div className="mt-[clamp(1.5rem,4vh,3rem)] w-[min(720px,80vw)]">
-              <div className="h-[5px] w-full overflow-hidden rounded-full bg-white/[0.08]">
+              <div className="h-[5px] w-full overflow-hidden rounded-full bg-surface-4">
                 <div
                   className="h-full rounded-full bg-accent transition-[width] duration-1000 ease-linear"
                   style={{ width: `${percent}%` }}
@@ -251,16 +281,16 @@ export default function FullscreenPage() {
             type="button"
             onClick={() => go(-1)}
             aria-label={t('fullscreen.switchPrev')}
-            className="grid h-9 w-9 place-items-center rounded-full border border-line text-ink-2 transition-colors hover:bg-white/[0.06] hover:text-ink"
+            className="grid h-9 w-9 place-items-center rounded-full border border-line text-ink-2 transition-colors hover:bg-surface-3 hover:text-ink"
           >
             <ChevronLeft size={15} strokeWidth={1.75} />
           </button>
-          <span className="text-[11px] text-ink-3">{t('fullscreen.hint')}</span>
+          <span className="text-[calc(11px*var(--fs-scale))] text-ink-3">{t('fullscreen.hint')}</span>
           <button
             type="button"
             onClick={() => go(1)}
             aria-label={t('fullscreen.switchNext')}
-            className="grid h-9 w-9 place-items-center rounded-full border border-line text-ink-2 transition-colors hover:bg-white/[0.06] hover:text-ink"
+            className="grid h-9 w-9 place-items-center rounded-full border border-line text-ink-2 transition-colors hover:bg-surface-3 hover:text-ink"
           >
             <ChevronRight size={15} strokeWidth={1.75} />
           </button>
@@ -279,9 +309,9 @@ export default function FullscreenPage() {
             className="pointer-events-auto flex items-center gap-2 rounded-full border border-line bg-elev/80 px-4 py-2 text-ink backdrop-blur-sm transition-colors hover:border-accent/45 hover:text-accent"
           >
             <Minimize2 size={15} strokeWidth={1.75} className="rotate-180" />
-            <span className="font-display text-[13px]">{t('fullscreen.clickToStart')}</span>
+            <span className="font-display text-[calc(13px*var(--fs-scale))]">{t('fullscreen.clickToStart')}</span>
           </button>
-          <span className="text-[11.5px] text-ink-3">{t('fullscreen.clickHint')}</span>
+          <span className="text-[calc(11.5px*var(--fs-scale))] text-ink-3">{t('fullscreen.clickHint')}</span>
         </div>
       )}
     </div>

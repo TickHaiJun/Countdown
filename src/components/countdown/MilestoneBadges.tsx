@@ -21,10 +21,10 @@ export function MilestoneBadges({ remainingMs, className }: MilestoneBadgesProps
           <span
             key={milestone}
             className={cn(
-              'tnum rounded-full border px-2.5 py-1 text-[11px] leading-none transition-colors',
+              'tnum rounded-full border px-2.5 py-1 text-[calc(11px*var(--fs-scale))] leading-none transition-colors',
               on
                 ? 'border-transparent text-[var(--color-ink)]'
-                : 'border-white/[0.07] text-[var(--color-ink-3)]',
+                : 'border-hairline-soft text-[var(--color-ink-3)]',
             )}
             style={on ? { background: 'rgba(129,140,248,0.16)' } : undefined}
           >

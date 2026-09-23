@@ -65,7 +65,7 @@ export function HolidayHero() {
       <section className="hero-screen page-x relative flex flex-col items-center justify-center pb-14 pt-8 text-center md:pt-12">
         {/* ---------------------------------------------- 药丸徽章 */}
         <AnimatedContent distance={14} duration={0.7} threshold={0}>
-          <span className="inline-flex items-center gap-2.5 rounded-full border border-line bg-white/[0.04] px-4 py-1.5 backdrop-blur-sm">
+          <span className="inline-flex items-center gap-2.5 rounded-full border border-line bg-surface-2 px-4 py-1.5 backdrop-blur-sm">
             <span className="relative flex h-1.5 w-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
@@ -73,10 +73,10 @@ export function HolidayHero() {
             <ShinyText
               text={t('landing.badge')}
               speed={5}
-              color="#a1a1aa"
-              shineColor="#dbeafe"
+              color="var(--color-ink-3)"
+              shineColor="var(--color-accent)"
               spread={120}
-              className="text-[12px]"
+              className="text-[calc(12px*var(--fs-scale))]"
             />
           </span>
         </AnimatedContent>
@@ -102,7 +102,7 @@ export function HolidayHero() {
            * 元素自身的文字区域，父级的渐变背景不会透到子 span 上——
            * 结果是整行文字直接消失。
            */}
-          <span className="block text-accent [text-shadow:0_0_70px_rgba(96,165,250,0.45)]">
+          <span className="block text-accent [text-shadow:0_0_70px_color-mix(in_srgb,var(--color-accent)_45%,transparent)]">
             <SplitText
               text={t('landing.titleAccent')}
               tag="span"
@@ -119,7 +119,7 @@ export function HolidayHero() {
 
         {/* ---------------------------------------------- 说明 */}
         <AnimatedContent distance={18} duration={0.7} delay={0.12} threshold={0}>
-          <p className="mx-auto mt-5 max-w-[46ch] text-[14px] leading-relaxed text-ink-2 md:text-[15px]">
+          <p className="mx-auto mt-5 max-w-[46ch] text-[calc(14px*var(--fs-scale))] leading-relaxed text-ink-2 md:text-[calc(15px*var(--fs-scale))]">
             {t('landing.subtitle')}
           </p>
         </AnimatedContent>
@@ -141,7 +141,7 @@ export function HolidayHero() {
               {ready && holiday ? name : '· · ·'}
             </h2>
 
-            <div className="mt-2 flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 text-[12.5px] text-ink-2">
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 text-[calc(12.5px*var(--fs-scale))] text-ink-2">
               {lunar ? (
                 <>
                   <span>{lunar}</span>
@@ -180,7 +180,7 @@ export function HolidayHero() {
             </div>
 
             {ready && holiday && !ongoing && workdays > 0 ? (
-              <p className="mt-5 text-[12.5px] text-ink-2">
+              <p className="mt-5 text-[calc(12.5px*var(--fs-scale))] text-ink-2">
                 {workdays === 1
                   ? t('hero.workdaysToGoOne')
                   : t('hero.workdaysToGo', { n: workdays })}
@@ -188,7 +188,7 @@ export function HolidayHero() {
             ) : null}
 
             {ongoing && view ? (
-              <p className="mt-5 text-[12.5px] text-ink-2">
+              <p className="mt-5 text-[calc(12.5px*var(--fs-scale))] text-ink-2">
                 {view.isFinalDay
                   ? t('hero.todayIsLastDay')
                   : t('hero.daysLeft', { n: view.daysLeft })}
@@ -196,7 +196,7 @@ export function HolidayHero() {
             ) : null}
 
             {ready && makeupDays.length > 0 ? (
-              <p className="mt-2.5 text-[12px] text-warn">
+              <p className="mt-2.5 text-[calc(12px*var(--fs-scale))] text-warn">
                 {makeupDays.length === 1
                   ? t('hero.makeupOn', {
                       date: formatDateMedium(Date.parse(`${makeupDays[0]}T12:00:00+08:00`), locale),
@@ -220,13 +220,14 @@ export function HolidayHero() {
             <StarBorder
               as={Link}
               href="/countdowns/"
-              color={ACCENT}
+              /* 配色全部走 token：浅色主题下 10% 蓝底 + 近白文字是不可读的 */
+              color="var(--color-accent)"
               speed="5s"
               thickness={1}
-              backgroundColor="rgba(96,165,250,0.10)"
-              textColor="#dbeafe"
-              borderColor="rgba(96,165,250,0.35)"
-              className="rounded-full [&>div:last-child]:rounded-full [&>div:last-child]:px-7 [&>div:last-child]:py-3 [&>div:last-child]:text-[13.5px]"
+              backgroundColor="color-mix(in srgb, var(--color-accent) 12%, transparent)"
+              textColor="var(--color-ink)"
+              borderColor="color-mix(in srgb, var(--color-accent) 35%, transparent)"
+              className="rounded-full [&>div:last-child]:rounded-full [&>div:last-child]:px-7 [&>div:last-child]:py-3 [&>div:last-child]:text-[calc(13.5px*var(--fs-scale))]"
             >
               <span className="flex items-center gap-2">
                 {t('landing.ctaPrimary')}
@@ -246,7 +247,7 @@ export function HolidayHero() {
         {/* ---------------------------------------------- 滚动提示 */}
         <a
           href="#features"
-          className="absolute bottom-5 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1.5 text-[11px] text-ink-3 transition-colors hover:text-ink-2"
+          className="absolute bottom-5 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1.5 text-[calc(11px*var(--fs-scale))] text-ink-3 transition-colors hover:text-ink-2"
         >
           {t('landing.featEyebrow')}
           <ChevronDown size={14} strokeWidth={1.75} className="animate-bounce" />

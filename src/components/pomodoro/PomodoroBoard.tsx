@@ -90,7 +90,7 @@ function NumberField({
           onBlur={(event) => commit(event.target.value)}
           className="pr-16 font-mono tabular-nums"
         />
-        <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[11.5px] text-ink-3">
+        <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[calc(11.5px*var(--fs-scale))] text-ink-3">
           {suffix}
         </span>
       </div>
@@ -126,7 +126,7 @@ export function PomodoroBoard() {
         <AnimatedContent distance={16} duration={0.65} threshold={0}>
           <p className="label-mono">{t('pomodoro.eyebrow')}</p>
           <h1 className="display-lg mt-3 text-ink">{t('pomodoro.title')}</h1>
-          <p className="mt-3 max-w-2xl text-[13.5px] leading-relaxed text-ink-2">
+          <p className="mt-3 max-w-2xl text-[calc(13.5px*var(--fs-scale))] leading-relaxed text-ink-2">
             {t('pomodoro.subtitle')}
           </p>
         </AnimatedContent>
@@ -145,7 +145,7 @@ export function PomodoroBoard() {
         */}
         <SpotlightCard className="h-full" spotlightColor="rgba(96, 165, 250, 0.14)">
           <div className="flex h-full flex-col p-6">
-            <h2 className="font-display text-[17px] tracking-tight text-ink">
+            <h2 className="font-display text-[calc(17px*var(--fs-scale))] tracking-tight text-ink">
               {t('pomodoro.settingsTitle')}
             </h2>
 
@@ -185,7 +185,7 @@ export function PomodoroBoard() {
                             }
                             aria-pressed={active}
                             className={cn(
-                              'rounded-full border px-3.5 py-1.5 text-[12px] transition-colors',
+                              'rounded-full border px-3.5 py-1.5 text-[calc(12px*var(--fs-scale))] transition-colors',
                               active
                                 ? 'border-accent/45 bg-accent/12 text-accent'
                                 : 'border-line text-ink-2 hover:border-line-strong hover:text-ink',
@@ -239,8 +239,8 @@ export function PomodoroBoard() {
                 <div className="mt-7 space-y-4 border-t border-line pt-6">
                   <label className="flex items-start justify-between gap-4">
                     <span>
-                      <span className="block text-[13px] text-ink">{t('pomodoro.autoNext')}</span>
-                      <span className="mt-1 block text-[11.5px] leading-relaxed text-ink-3">
+                      <span className="block text-[calc(13px*var(--fs-scale))] text-ink">{t('pomodoro.autoNext')}</span>
+                      <span className="mt-1 block text-[calc(11.5px*var(--fs-scale))] leading-relaxed text-ink-3">
                         {t('pomodoro.autoNextHint')}
                       </span>
                     </span>
@@ -253,8 +253,8 @@ export function PomodoroBoard() {
 
                   <label className="flex items-start justify-between gap-4">
                     <span>
-                      <span className="block text-[13px] text-ink">{t('pomodoro.sound')}</span>
-                      <span className="mt-1 block text-[11.5px] leading-relaxed text-ink-3">
+                      <span className="block text-[calc(13px*var(--fs-scale))] text-ink">{t('pomodoro.sound')}</span>
+                      <span className="mt-1 block text-[calc(11.5px*var(--fs-scale))] leading-relaxed text-ink-3">
                         {t('pomodoro.soundHint')}
                       </span>
                     </span>
@@ -328,7 +328,7 @@ function StatLine({
           // 未 hydrate 时保留占位符，避免 0 → 真实值 的跳动
           <span className="text-[clamp(2rem,4vw,2.6rem)] text-ink-3">—</span>
         )}
-        <span className="text-[12px] text-ink-3">{suffix}</span>
+        <span className="text-[calc(12px*var(--fs-scale))] text-ink-3">{suffix}</span>
       </p>
       <p className="label-mono mt-2.5">{label}</p>
     </div>

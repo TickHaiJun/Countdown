@@ -54,7 +54,7 @@ export function OngoingSection() {
                 {holidayName(holiday, locale)}
               </h2>
             </div>
-            <p className="text-[12px] text-ink-2">
+            <p className="text-[calc(12px*var(--fs-scale))] text-ink-2">
               {t('ongoing.finishedAt', {
                 date: formatDateFull(holiday.endMs, locale),
               })}
@@ -76,13 +76,13 @@ export function OngoingSection() {
           </div>
 
           <div className="mt-6">
-            <div className="h-[3px] w-full overflow-hidden rounded-full bg-white/[0.07]">
+            <div className="h-[3px] w-full overflow-hidden rounded-full bg-surface-4">
               <div
                 className="h-full rounded-full bg-accent transition-[width] duration-1000 ease-linear"
                 style={{ width: `${percent}%` }}
               />
             </div>
-            <div className="mt-2.5 flex items-center justify-between text-[11.5px] text-ink-3">
+            <div className="mt-2.5 flex items-center justify-between text-[calc(11.5px*var(--fs-scale))] text-ink-3">
               <span>{t('ongoing.elapsed', { n: percent })}</span>
               <span>{t('ongoing.remaining')}</span>
             </div>

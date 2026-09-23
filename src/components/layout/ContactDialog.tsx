@@ -52,14 +52,14 @@ export function ContactDialog({ className }: { className?: string }) {
     <Dialog>
       <DialogTrigger
         className={cn(
-          'group inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.03] px-4 py-2 text-[12.5px] text-ink-2 transition-colors',
-          'hover:border-line-strong hover:bg-white/[0.06] hover:text-ink',
+          'group inline-flex items-center gap-2 rounded-full border border-line bg-surface-2 px-4 py-2 text-[calc(12.5px*var(--fs-scale))] text-ink-2 transition-colors',
+          'hover:border-line-strong hover:bg-surface-3 hover:text-ink',
           className,
         )}
       >
         <MessageCircle size={14} strokeWidth={1.75} className="text-accent" />
         {t('contact.label')}
-        <span className="font-mono text-[12.5px] text-ink group-hover:text-accent">
+        <span className="font-mono text-[calc(12.5px*var(--fs-scale))] text-ink group-hover:text-accent">
           {WECHAT_ID}
         </span>
       </DialogTrigger>
@@ -84,10 +84,10 @@ export function ContactDialog({ className }: { className?: string }) {
             />
           </div>
 
-          <p className="mt-4 text-center text-[12.5px] text-ink-2">{t('contact.hint')}</p>
+          <p className="mt-4 text-center text-[calc(12.5px*var(--fs-scale))] text-ink-2">{t('contact.hint')}</p>
 
           <div className="mt-4 flex items-center justify-center gap-2">
-            <code className="rounded-full border border-line bg-white/[0.04] px-3 py-1.5 font-mono text-[12.5px] text-ink">
+            <code className="rounded-full border border-line bg-surface-2 px-3 py-1.5 font-mono text-[calc(12.5px*var(--fs-scale))] text-ink">
               {WECHAT_ID}
             </code>
             <Button size="sm" variant="outline" onClick={handleCopy} className="gap-1.5">

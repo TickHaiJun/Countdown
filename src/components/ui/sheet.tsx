@@ -46,7 +46,7 @@ export function SheetContent({
       >
         {children}
         <DialogPrimitive.Close
-          className="absolute right-4 top-4 rounded-lg p-1.5 text-ink-3 transition-colors hover:bg-white/[0.06] hover:text-ink"
+          className="absolute right-4 top-4 rounded-lg p-1.5 text-ink-3 transition-colors hover:bg-surface-3 hover:text-ink"
           aria-label={closeLabel}
         >
           <X size={15} strokeWidth={1.75} />
@@ -68,7 +68,7 @@ export function SheetTitle({
 }: React.ComponentProps<typeof DialogPrimitive.Title>) {
   return (
     <DialogPrimitive.Title
-      className={cn('font-display text-[17px] tracking-tight', className)}
+      className={cn('font-display text-[calc(17px*var(--fs-scale))] tracking-tight', className)}
       {...props}
     />
   );
@@ -80,7 +80,7 @@ export function SheetDescription({
 }: React.ComponentProps<typeof DialogPrimitive.Description>) {
   return (
     <DialogPrimitive.Description
-      className={cn('mt-1 text-[12px] leading-relaxed text-ink-2', className)}
+      className={cn('mt-1 text-[calc(12px*var(--fs-scale))] leading-relaxed text-ink-2', className)}
       {...props}
     />
   );

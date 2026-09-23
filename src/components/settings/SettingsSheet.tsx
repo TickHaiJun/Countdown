@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, type ReactNode } from 'react';
-import { Download, RotateCcw, Trash2, TriangleAlert, Upload } from 'lucide-react';
+import { Check, Download, RotateCcw, Trash2, TriangleAlert, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -24,9 +24,18 @@ import { Switch } from '@/components/ui/switch';
 import { LOCALES, useI18n } from '@/i18n';
 import { downloadText, timestampSuffix } from '@/lib/export/download';
 import { formatDateShort } from '@/i18n/format';
+import { cn } from '@/lib/utils';
 import { SCHEMA_VERSION, useCountdownStore } from '@/store/countdown-store';
 import { useUiStore } from '@/store/ui-store';
-import type { CountdownEvent, Locale, Settings } from '@/types';
+import type {
+  BodyTone,
+  CountdownEvent,
+  FontScale,
+  HeadingTone,
+  Locale,
+  Settings,
+  ThemeName,
+} from '@/types';
 
 interface TrashRow {
   id: string;
@@ -38,7 +47,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="mb-7 last:mb-0">
       <h3 className="label-mono mb-2">{title}</h3>
-      <div className="divide-y divide-white/[0.05] rounded-card border border-line bg-white/[0.015] px-4">
+      <div className="divide-y divide-hairline-soft rounded-card border border-line bg-surface-1 px-4">
         {children}
       </div>
     </section>
@@ -57,9 +66,9 @@ function Row({
   return (
     <div className="flex items-start justify-between gap-5 py-3.5">
       <div className="min-w-0">
-        <p className="text-[13px] text-ink">{title}</p>
+        <p className="text-[calc(13px*var(--fs-scale))] text-ink">{title}</p>
         {hint ? (
-          <p className="mt-0.5 text-[11px] leading-relaxed text-ink-3">{hint}</p>
+          <p className="mt-0.5 text-[calc(11px*var(--fs-scale))] leading-relaxed text-ink-3">{hint}</p>
         ) : null}
       </div>
       {children ? <div className="shrink-0 pt-0.5">{children}</div> : null}
@@ -126,6 +135,35 @@ export function SettingsSheet() {
     }
   };
 
+  /*
+   * 选项先经 t() 展开成数组，不用 `t('settings.theme' + value)` 拼键——
+   * 字典是强类型的，拼出来的字符串绕过了检查，漏一个键要到运行时才发现。
+   */
+  const themeOptions: { value: ThemeName; label: string }[] = [
+    { value: 'grain', label: t('settings.themeGrain') },
+    { value: 'golden', label: t('settings.themeGolden') },
+    { value: 'blueprint', label: t('settings.themeBlueprint') },
+    { value: 'aurora', label: t('settings.themeAurora') },
+  ];
+
+  const fontScaleOptions: { value: FontScale; label: string }[] = [
+    { value: 'compact', label: t('settings.fontScaleCompact') },
+    { value: 'normal', label: t('settings.fontScaleNormal') },
+    { value: 'wide', label: t('settings.fontScaleWide') },
+  ];
+
+  const headingOptions: { value: HeadingTone; label: string }[] = [
+    { value: 'default', label: t('settings.toneDefault') },
+    { value: 'accent', label: t('settings.toneAccent') },
+    { value: 'max', label: t('settings.toneMax') },
+  ];
+
+  const bodyOptions: { value: BodyTone; label: string }[] = [
+    { value: 'default', label: t('settings.toneDefault') },
+    { value: 'strong', label: t('settings.bodyStrong') },
+    { value: 'soft', label: t('settings.bodySoft') },
+  ];
+
   return (
     <>
       <Sheet open={open} onOpenChange={setOpen}>
@@ -146,6 +184,69 @@ export function SettingsSheet() {
                     value: item.value,
                     label: item.short,
                   }))}
+                />
+              </Row>
+            </Section>
+
+            <Section title={t('settings.sectionTheme')}>
+              <div className="py-3.5">
+                <div className="grid grid-cols-2 gap-2">
+                  {themeOptions.map(({ value, label }) => {
+                    const active = settings.theme === value;
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => updateSettings({ theme: value })}
+                        aria-pressed={active}
+                        className={cn(
+                          'flex items-center gap-2.5 rounded-control border px-3 py-2.5 text-left transition-colors',
+                          active
+                            ? 'border-accent/55 bg-accent/10 text-ink'
+                            : 'border-line text-ink-2 hover:border-line-strong hover:text-ink',
+                        )}
+                      >
+                        {/* 色卡只是装饰，真实配色见 globals.css 的主题块 */}
+                        <span className="theme-swatch" data-swatch={value} aria-hidden="true" />
+                        <span className="min-w-0 flex-1 truncate font-display text-[calc(12.5px*var(--fs-scale))]">
+                          {label}
+                        </span>
+                        {active ? (
+                          <Check size={13} strokeWidth={2.2} className="shrink-0 text-accent" />
+                        ) : null}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="mt-2 text-[calc(11px*var(--fs-scale))] leading-relaxed text-ink-3">
+                  {t('settings.themeHint')}
+                </p>
+              </div>
+            </Section>
+
+            <Section title={t('settings.sectionText')}>
+              <Row title={t('settings.fontScale')} hint={t('settings.fontScaleHint')}>
+                <SegmentedControl<FontScale>
+                  ariaLabel={t('settings.fontScale')}
+                  value={settings.fontScale}
+                  onChange={(value) => updateSettings({ fontScale: value })}
+                  options={fontScaleOptions}
+                />
+              </Row>
+              <Row title={t('settings.headingTone')} hint={t('settings.headingToneHint')}>
+                <SegmentedControl<HeadingTone>
+                  ariaLabel={t('settings.headingTone')}
+                  value={settings.headingTone}
+                  onChange={(value) => updateSettings({ headingTone: value })}
+                  options={headingOptions}
+                />
+              </Row>
+              <Row title={t('settings.bodyTone')} hint={t('settings.bodyToneHint')}>
+                <SegmentedControl<BodyTone>
+                  ariaLabel={t('settings.bodyTone')}
+                  value={settings.bodyTone}
+                  onChange={(value) => updateSettings({ bodyTone: value })}
+                  options={bodyOptions}
                 />
               </Row>
             </Section>
@@ -234,10 +335,10 @@ export function SettingsSheet() {
                       className="flex items-center justify-between gap-3 py-3"
                     >
                       <div className="min-w-0">
-                        <p className="truncate text-[13px] text-ink-2">
+                        <p className="truncate text-[calc(13px*var(--fs-scale))] text-ink-2">
                           {item.payload.title}
                         </p>
-                        <p className="mt-0.5 text-[11px] text-ink-3">
+                        <p className="mt-0.5 text-[calc(11px*var(--fs-scale))] text-ink-3">
                           {formatDateShort(Date.parse(item.deletedAt), locale)}
                         </p>
                       </div>
@@ -264,7 +365,7 @@ export function SettingsSheet() {
                     </div>
                   ))}
                   <div className="flex items-center justify-between py-3">
-                    <p className="text-[11px] text-ink-3">
+                    <p className="text-[calc(11px*var(--fs-scale))] text-ink-3">
                       {t('settings.trashCount', { n: trashed.length })}
                     </p>
                     <Button size="sm" variant="ghost" onClick={emptyTrash}>

@@ -62,10 +62,10 @@ function FeatureBody({ feature }: { feature: Feature }) {
       <span className="grid h-10 w-10 place-items-center rounded-[12px] border border-accent/25 bg-accent/10 text-accent">
         <Icon size={17} strokeWidth={1.75} />
       </span>
-      <h3 className="mt-5 font-display text-[17px] tracking-tight text-ink">
+      <h3 className="mt-5 font-display text-[calc(17px*var(--fs-scale))] tracking-tight text-ink">
         {t(feature.titleKey)}
       </h3>
-      <p className="mt-2.5 flex-1 text-[13px] leading-relaxed text-ink-2">
+      <p className="mt-2.5 flex-1 text-[calc(13px*var(--fs-scale))] leading-relaxed text-ink-2">
         {t(feature.descKey)}
       </p>
     </div>
@@ -93,7 +93,7 @@ export function FeatureSection() {
           stepDuration={0.3}
           className="display-lg mt-3 justify-center text-ink"
         />
-        <p className="mt-4 text-[13.5px] leading-relaxed text-ink-2">
+        <p className="mt-4 text-[calc(13.5px*var(--fs-scale))] leading-relaxed text-ink-2">
           {t('landing.featSubtitle')}
         </p>
       </div>
@@ -138,8 +138,8 @@ export function FeatureSection() {
               <GlareHover
                 width="100%"
                 height="100%"
-                background="rgba(255, 255, 255, 0.02)"
-                borderColor="rgba(255, 255, 255, 0.08)"
+                background="var(--color-surface-1)"
+                borderColor="var(--color-line)"
                 borderRadius="16px"
                 glareColor="#b3e5ff"
                 glareOpacity={0.18}

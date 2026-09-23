@@ -50,6 +50,16 @@ interface UiState {
    */
   immersiveOpen: boolean;
   setImmersiveOpen: (open: boolean) => void;
+
+  /*
+   * 持久化 store 是否已经完成 rehydrate。
+   *
+   * 外观（主题 / 字号 / 字色）必须等它为 true 才能应用，否则会用
+   * 「默认值」先覆盖一次用户真正存的设置 —— 浅色主题用户会看到一帧深色。
+   * 默认主题的 WebGL 背景同样 gate 在它上面，避免挂载了又被卸载。
+   */
+  storeHydrated: boolean;
+  setStoreHydrated: (hydrated: boolean) => void;
 }
 
 export const useUiStore = create<UiState>()((set) => ({
@@ -77,4 +87,7 @@ export const useUiStore = create<UiState>()((set) => ({
 
   immersiveOpen: false,
   setImmersiveOpen: (open) => set({ immersiveOpen: open }),
+
+  storeHydrated: false,
+  setStoreHydrated: (hydrated) => set({ storeHydrated: hydrated }),
 }));

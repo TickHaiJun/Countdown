@@ -70,7 +70,7 @@ export function EventCard({
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             <span
-              className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] leading-none"
+              className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[calc(11px*var(--fs-scale))] leading-none"
               style={{
                 borderColor: `${tag.color}33`,
                 color: tag.color,
@@ -83,7 +83,7 @@ export function EventCard({
             {statusLabel ? (
               <span
                 className={cn(
-                  'inline-flex items-center gap-1.5 text-[11px]',
+                  'inline-flex items-center gap-1.5 text-[calc(11px*var(--fs-scale))]',
                   view.phase === 'ongoing' ? 'text-accent' : 'text-ink-3',
                 )}
               >
@@ -105,7 +105,7 @@ export function EventCard({
               onClick={() => togglePinned(event.id)}
               aria-label={event.pinned ? t('event.unpin') : t('event.pin')}
               title={event.pinned ? t('event.unpin') : t('event.pin')}
-              className="grid h-7 w-7 place-items-center rounded-lg text-ink-3 transition-colors hover:bg-white/[0.07] hover:text-ink"
+              className="grid h-7 w-7 place-items-center rounded-lg text-ink-3 transition-colors hover:bg-surface-3 hover:text-ink"
             >
               <Pin size={12} strokeWidth={1.75} />
             </button>
@@ -115,7 +115,7 @@ export function EventCard({
                 onClick={() => onEdit(event.id)}
                 aria-label={t('event.edit')}
                 title={t('event.edit')}
-                className="grid h-7 w-7 place-items-center rounded-lg text-ink-3 transition-colors hover:bg-white/[0.07] hover:text-ink"
+                className="grid h-7 w-7 place-items-center rounded-lg text-ink-3 transition-colors hover:bg-surface-3 hover:text-ink"
               >
                 <Pencil size={12} strokeWidth={1.75} />
               </button>
@@ -126,7 +126,7 @@ export function EventCard({
                 onClick={() => onExport(event)}
                 aria-label={t('event.export')}
                 title={t('event.export')}
-                className="grid h-7 w-7 place-items-center rounded-lg text-ink-3 transition-colors hover:bg-white/[0.07] hover:text-ink"
+                className="grid h-7 w-7 place-items-center rounded-lg text-ink-3 transition-colors hover:bg-surface-3 hover:text-ink"
               >
                 <ImageDown size={12} strokeWidth={1.75} />
               </button>
@@ -148,7 +148,7 @@ export function EventCard({
         {/* 标题 */}
         <h3
           className={cn(
-            'mt-3.5 font-display text-[18.5px] leading-snug tracking-tight',
+            'mt-3.5 font-display text-[calc(18.5px*var(--fs-scale))] leading-snug tracking-tight',
             hideTitle && 'masked-title',
           )}
           title={hideTitle ? undefined : event.title}
@@ -157,7 +157,7 @@ export function EventCard({
         </h3>
 
         {/* 日期与重复 */}
-        <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[12px] text-ink-3">
+        <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[calc(12px*var(--fs-scale))] text-ink-3">
           <span>{formatDateRange(occurrenceMs, endMs, locale)}</span>
           {recurrenceLabel ? (
             <>
@@ -172,7 +172,7 @@ export function EventCard({
         {/* 倒计时：隐私模式只藏标题，数字照常显示 */}
         <div className="mt-5 flex-1">
           {view.phase === 'ended' ? (
-            <p className="font-display text-[15px] text-ink-3">
+            <p className="font-display text-[calc(15px*var(--fs-scale))] text-ink-3">
               {t('event.finished', { n: Math.abs(view.daysLeft) })}
             </p>
           ) : (
@@ -189,7 +189,7 @@ export function EventCard({
             />
           )}
           {view.phase !== 'ended' ? (
-            <p className="mt-3 text-[12.5px] text-ink-3">
+            <p className="mt-3 text-[calc(12.5px*var(--fs-scale))] text-ink-3">
               {formatRelativeDay(occurrenceMs, nowMs, locale, t)}
             </p>
           ) : null}
@@ -198,13 +198,13 @@ export function EventCard({
         {/* 进行中：进度条 */}
         {view.phase === 'ongoing' ? (
           <div className="mt-4">
-            <div className="h-[3px] w-full overflow-hidden rounded-full bg-white/[0.07]">
+            <div className="h-[3px] w-full overflow-hidden rounded-full bg-surface-4">
               <div
                 className="h-full rounded-full bg-accent transition-[width] duration-1000 ease-linear"
                 style={{ width: `${Math.round(view.progress * 100)}%` }}
               />
             </div>
-            <p className="mt-1.5 text-[10.5px] text-ink-3">
+            <p className="mt-1.5 text-[calc(10.5px*var(--fs-scale))] text-ink-3">
               {t('ongoing.elapsed', { n: Math.round(view.progress * 100) })}
             </p>
           </div>

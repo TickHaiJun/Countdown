@@ -12,16 +12,16 @@ export const buttonVariants = cva(
         /* 主操作：全站只有它用实心强调色 */
         primary: 'rounded-full bg-accent text-accent-ink hover:bg-accent-deep',
         outline:
-          'rounded-full border border-line text-ink hover:border-line-strong hover:bg-white/[0.04]',
+          'rounded-full border border-line text-ink hover:border-line-strong hover:bg-surface-3',
         subtle:
-          'rounded-control border border-line bg-white/[0.04] text-ink hover:bg-white/[0.07]',
+          'rounded-control border border-line bg-surface-2 text-ink hover:bg-surface-3',
         danger: 'rounded-control border border-alert/35 text-alert hover:bg-alert/10',
-        ghost: 'rounded-control text-ink-2 hover:bg-white/[0.05] hover:text-ink',
+        ghost: 'rounded-control text-ink-2 hover:bg-surface-3 hover:text-ink',
       },
       size: {
-        sm: 'h-8 px-3 text-[12px]',
-        md: 'h-10 px-5 text-[13px]',
-        lg: 'h-11 px-6 text-[14px]',
+        sm: 'h-8 px-3 text-[calc(12px*var(--fs-scale))]',
+        md: 'h-10 px-5 text-[calc(13px*var(--fs-scale))]',
+        lg: 'h-11 px-6 text-[calc(14px*var(--fs-scale))]',
         icon: 'h-9 w-9',
         'icon-sm': 'h-8 w-8',
       },

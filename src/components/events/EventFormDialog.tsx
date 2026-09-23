@@ -102,7 +102,7 @@ function InlineField({
   className?: string;
 }) {
   return (
-    <div className={cn('flex flex-wrap items-center gap-2 text-[12px] text-ink-2', className)}>
+    <div className={cn('flex flex-wrap items-center gap-2 text-[calc(12px*var(--fs-scale))] text-ink-2', className)}>
       {children}
     </div>
   );
@@ -293,7 +293,7 @@ export function EventFormDialog() {
                         onClick={() => patch({ tag })}
                         aria-pressed={active}
                         className={cn(
-                          'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[12px] transition-colors',
+                          'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[calc(12px*var(--fs-scale))] transition-colors',
                           active
                             ? 'border-transparent text-accent-ink'
                             : 'border-line text-ink-2 hover:border-line-strong hover:text-ink',
@@ -309,8 +309,8 @@ export function EventFormDialog() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-4 rounded-control border border-line bg-white/[0.02] px-3.5 py-2.5">
-              <span className="text-[13px] text-ink-2">{t('event.fieldAllDay')}</span>
+            <div className="flex items-center justify-between gap-4 rounded-control border border-line bg-surface-1 px-3.5 py-2.5">
+              <span className="text-[calc(13px*var(--fs-scale))] text-ink-2">{t('event.fieldAllDay')}</span>
               <Switch
                 checked={form.allDay}
                 onCheckedChange={(checked) => patch({ allDay: checked })}
@@ -390,7 +390,7 @@ export function EventFormDialog() {
                           })
                         }
                         className={cn(
-                          'h-8 min-w-10 rounded-lg border px-2 text-[12px] transition-colors',
+                          'h-8 min-w-10 rounded-lg border px-2 text-[calc(12px*var(--fs-scale))] transition-colors',
                           active
                             ? 'border-accent/40 bg-accent/15 text-accent'
                             : 'border-line text-ink-2 hover:border-line-strong hover:text-ink',
@@ -503,14 +503,14 @@ export function EventFormDialog() {
                       <option value="none">{t('recurrence.paydayNone')}</option>
                     </NativeSelect>
                   </InlineField>
-                  <p className="mt-2 text-[11px] leading-relaxed text-ink-3">
+                  <p className="mt-2 text-[calc(11px*var(--fs-scale))] leading-relaxed text-ink-3">
                     {t('event.paydayHint')}
                   </p>
                 </>
               ) : null}
 
               {form.kind === 'monthlyLastWorkday' ? (
-                <p className="mt-2 text-[11px] leading-relaxed text-ink-3">
+                <p className="mt-2 text-[calc(11px*var(--fs-scale))] leading-relaxed text-ink-3">
                   {t('event.lastWorkdayHint')}
                 </p>
               ) : null}
@@ -527,10 +527,10 @@ export function EventFormDialog() {
               />
             </div>
 
-            <div className="flex items-center justify-between gap-4 rounded-control border border-line bg-white/[0.02] px-3.5 py-2.5">
+            <div className="flex items-center justify-between gap-4 rounded-control border border-line bg-surface-1 px-3.5 py-2.5">
               <div>
-                <p className="text-[13px] text-ink-2">{t('event.fieldPin')}</p>
-                <p className="mt-0.5 text-[11px] text-ink-3">{t('event.fieldPinHint')}</p>
+                <p className="text-[calc(13px*var(--fs-scale))] text-ink-2">{t('event.fieldPin')}</p>
+                <p className="mt-0.5 text-[calc(11px*var(--fs-scale))] text-ink-3">{t('event.fieldPinHint')}</p>
               </div>
               <Switch
                 checked={form.pinned}
@@ -539,7 +539,7 @@ export function EventFormDialog() {
               />
             </div>
 
-            {error ? <p className="text-[12px] text-alert">{error}</p> : null}
+            {error ? <p className="text-[calc(12px*var(--fs-scale))] text-alert">{error}</p> : null}
           </div>
 
           <DialogFooter className="mt-auto">

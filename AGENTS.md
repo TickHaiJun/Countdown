@@ -22,7 +22,7 @@
 | D2 | 数据存储 | 仅 `localStorage`（Zustand persist）。无账号、无云同步、无后端 |
 | D3 | 部署路径 | 项目页 → `basePath = /Countdown`，线上地址 `https://tickhaijun.github.io/Countdown/` |
 | D4 | 时区 | 假期/事件时间锚定 **Asia/Shanghai (UTC+8)**，所有字面量日期带 `+08:00` 偏移；不做本地时区换算 |
-| D5 | 默认主题 | dark 为唯一默认；light 仅作 token 预留（`screen` → `multiply`），本期不实现主题切换 UI |
+| D5 | 主题 | **四套可切换**（2026-09-23 起）：`grain` 默认（WebGL 颗粒渐变，纯黑底）、`golden`（唯一浅色）、`blueprint`、`aurora`。存 `Settings.theme`，设置面板可选。见 D23 / §11.8 |
 | D6 | 数据来源 | 节假日以国务院办公厅通知为准，内置 JSON，支持用户导入覆盖 |
 | D7 | PWA | 手写 `manifest.webmanifest` + 轻量 `sw.js`（约 60 行），**不引入** `next-pwa` / Serwist |
 | D8 | 2027 数据口径 | 只显示《全国年节及纪念日放假办法》确定的 **13 天法定节假日**，不推断调休连休，**UI 不加「待官方公布」角标** |
@@ -30,20 +30,26 @@
 | D10 | 首页信息密度 | 不做「今日速览」四格统计块；Hero **占满首屏**，事件区在首屏下方 |
 | D11 | 进度基准 | 假期用 `start`；自定义事件用 `createdAt`（假期没有创建时间）；假期进度条仅在 `ongoing` 时展示 |
 | D12 | 里程碑口径 | 按**展示口径**（天数 floor）判定，保证「屏幕显示 3 天」时「3 天」徽章必定点亮 |
-| D13 | 视觉主题 | **Diamond Storm**。底色 `#100e0b`，强调色 `#60a5fa`，正文 `#f4f4f5`。取代早期的 Cosmic Ash |
+| D13 | 默认配色 | 默认主题保留 **Diamond Storm 的蓝**（强调色 `#60a5fa`）。底色改为随主题走：`grain` 是纯黑（对齐 shader 的 `colorBack=""#000000""`），`blueprint` / `aurora` 仍是暖黑 `#100e0b`。~~Cosmic Ash~~、~~`#100e0b` 是全站唯一底色~~ |
 | D14 | 国际化 | **中英双语，用户可切**。方案 A：客户端字典（Context + localStorage），**不做 URL 路由前缀**（静态导出下最省事） |
 | D15 | 默认语言 | `navigator.language` 自动判定；用户一旦手动切过就写 `localeExplicit: true`，此后不再自动跟随 |
 | D16 | 农历的英文 | **用拼音，不意译**（`八月十五` → `bayue shiwu`）。法定节日名用通行译名（`Mid-Autumn Festival`） |
 | D17 | 组件来源 | **React Bits 走 shadcn CLI 安装**（`npx shadcn@latest add https://reactbits.dev/r/<Name>-TS-TW`），落到 `src/components/reactbits/` |
-| D18 | 背景实现 | **纯 CSS 三层 Aura**（`mix-blend-mode` + SVG 颗粒 + 压暗面纱），**不再用 WebGL**。~~曾用 `ogl` + `<Aurora>`~~，已卸载，省约 100KB；额外收益是 `html-to-image` 也能截到，导出卡片可复用同一套背景 |
+| D18 | 背景实现 | **三套 CSS Aura + 一套 WebGL**。`golden` / `blueprint` / `aurora` 是纯 CSS 叠层；默认主题 `grain` 走 `@paper-design/shaders-react` 的 `GrainGradient`（**全站唯一的 WebGL context**，红线 10），其下始终垫一层同色系 CSS 近似，负责首屏占位与无 WebGL 降级。~~`ogl` + `<Aurora>`~~ 已卸载 |
 | D19 | 展示字体 | **Space Grotesk**（`next/font/google`，只自托管 latin 子集）；中文走系统栈 PingFang SC / Microsoft YaHei |
 | D20 | 翻牌时钟 | **自研 `FlipClock`**，不用 React Bits 的 `SplitFlapText`——后者只在 `words[]` 轮换时动，单 `text` 模式下是瞬跳，做不了逐秒倒计时 |
 | D21 | 设置入口 | **不做 `/settings` 路由**，设置收进顶栏齿轮 → Sheet 抽屉 |
 | D22 | 日期格式化 | **手写查表实现，不用 `Intl`**——Node 与浏览器对 `zh-CN` 的细节输出不一致，静态导出下会 hydration mismatch |
+| D23 | 导出配色 | **固定 Diamond Storm，与主题解耦**。7 套模板继续用硬编码的 `#100e0b` / `#60a5fa`，不读任何 token。好处是绕开了「`html-to-image` 截不到 WebGL」这个矛盾——代价是导出卡片与站点当前主题不一致，已接受 |
+| D24 | 字号档位 | **方案 A：只缩放字号，不动间距**。做法是把 100 处写死的 `text-[13px]` 改成 `text-[calc(13px*var(--fs-scale))]`，`--fs-scale` 由设置驱动（紧凑 0.94 / 标准 1 / 宽松 1.08）。**不能**改 `html{font-size}`：那样 px 字号不动而 rem 间距会一起放大，布局直接坏掉，还会撞上首屏高度预算（红线 8） |
+| D25 | 字色档位 | 标题色 3 档（默认 / 强调色 / 高对比）、正文色 3 档（默认 / 更强 / 更淡），落在 `<html>` 的 `data-heading` / `data-body-tone` 上，由 CSS 覆写 `--color-ink` / `--color-ink-2`。**没有取色器**：自由选色会轻易把对比度做到不可读，档位限定在安全区间内 |
 
 ### 0.2 红线（违反即返工）
 
-1. **`#100e0b` 只能放在 `<body>` / 页面根容器上。** 渐变容器自身必须透明——否则 `mix-blend-mode` 会与容器底色合成，颜色错误。
+1. **主题底色只能放在 `<body>` 上（由 `--color-base` 提供），背景容器自身必须透明。**
+   容器一旦有 `background-color`，`mix-blend-mode` 就会与容器底色合成，整体发灰。
+   另外 `.bg-canvas` 是 `z-index: 0` 的定位元素、自身即成层叠上下文，所以合成基准被限制在它内部——
+   这也是为什么背景组内部必须有一层 `.aura-base` 铺 `--color-base`（见 §11.1）。
 2. 渐变容器必须显式 `min-height`（如 `100svh`），因为绝对定位子层贡献 0 高度。
 3. 所有装饰层：`pointer-events: none` + `aria-hidden="true"`；容器 `position: relative` + `overflow: hidden`。
 4. 页面内容必须包在 `position: relative; z-index: 1` 的容器里，否则被装饰层盖住。
@@ -58,6 +64,12 @@
 13. `src/components/reactbits/` 下的文件是上游生成物，统一带 `// @ts-nocheck`。**改它们必须在注释里写清原因**（已改：`SpotlightCard`、`SplitText`）。
 14. **不要直接调用只存在于「安全上下文」的浏览器 API。** `crypto.randomUUID()`、`navigator.clipboard`、`navigator.serviceWorker` 在 `http://192.168.x.x` 这类地址下整个是 `undefined`——局域网真机上打开时，`crypto.randomUUID()` 会抛 `TypeError`，表现就是「点新建倒计时没反应」。统一走 `src/lib/uuid.ts` 的 `createId()` 与 `src/lib/clipboard.ts` 的 `copyText()`；其余场景先判 `window.isSecureContext` 再降级。
 15. **`GlareHover` 内部写死了 `grid place-items-center`，是把内容"居中"而不是"铺满"。** 中文说明文字比英文更容易折成两行，内容一高一矮，同一行里的两张卡就对不齐——现象是「英文站正常、中文站错位」。卡片场景必须用内联 `style={{ placeItems: 'stretch' }}` 覆盖（内联优先级高于 class，不必改上游），只有按钮/芯片这类尺寸自适应的场景才保留默认居中。
+16. **新增一套主题，只允许动两个地方：`globals.css` 末尾的 `:root[data-theme='x']` token 块，和 `Backdrop` 里追加的一层背景。** 组件层必须一行都不改——Tailwind v4 把 token 编成了 `.text-ink-2{color:var(--color-ink-2)}`，改根变量即全站生效。**若发现必须改某个组件才能让新主题正常，说明那个组件还有硬编码颜色，要修的是它。**
+17. **颜色一律走 token，不许写死 `rgba(255,255,255,x)` 这类"假设深色"的值。** 需要"比底色稍微亮一点的一层"就用 `surface-1..4`；需要"一条细边"用 `line` / `hairline-soft` / `hairline-strong`。浅色主题靠反向这组 token 一次翻转，漏一处就是浅底上一块灰雾。唯一豁免：`ExportDialog` 里二维码的 `bg-white`（扫码需要白底）与导出模板的颜色（D23）。
+18. **外观（主题 / 字号 / 字色）必须同时写在两处**：`<head>` 里的内联脚本（首屏，读 localStorage）与 `lib/appearance.ts` 的 `applyAppearance`（hydrate 之后）。两者产出必须完全一致，否则会出现「首屏一帧 A、hydrate 后跳到 B」的闪烁。`tests/appearance.test.ts` 穷举 4×3×3×3 组合在守这条。
+19. **服务端链路里不许从带 `'use client'` 的模块读非组件导出。** `app/layout.tsx`（服务端组件）间接引到的模块，若从 `@/store/countdown-store` 这类客户端模块里取一个字符串常量，Next 会把导入换成**客户端引用代理**，取值恒为 `undefined`，而且**不报任何错**。跨链路共享的常量必须放在中性模块（`src/lib/storage-keys.ts`）。
+    > 这条踩过：`JSON.stringify(undefined)` 返回的**不是字符串**而是 `undefined`，模板字面量于是把字面量 `undefined` 烙进产物，脚本退化成 `localStorage.getItem(undefined)` —— 取不到存档、首行 `return`，整套首屏防闪**静默失效**，现象是浅色主题刷新先闪一帧深色。单测抓不到（测试环境没有这条模块边界），所以 `appearance.ts` 里加了构建期断言，让构建直接失败。**写断言时别用 `expect(str).toContain(v)` 配可能为 `undefined` 的 `v`** —— 入参会转成字符串 `"undefined"`，断言照样通过。
+20. **构建产物必须带 basePath。** 本地验证跑 `npm run build:pages`（把 `NEXT_PUBLIC_BASE_PATH=/Countdown` 钉死，等价 CI 的 `npm run build`），**不要**用裸 `npm run build` —— 它产出 `basePath=''` 的站点，铺到项目页 `/Countdown/` 下就是整站资源 404：页面零样式、React 不 hydrate、点按钮全无反应，**但浏览器控制台不报错**（资源 404 不走 CDP 的 Runtime 域，只走 Network 域）。
 
 ---
 
@@ -97,6 +109,7 @@
 | 包 | 用途 | 理由 |
 | --- | --- | --- |
 | `qrcode` | 导出卡片上的二维码 | 生成 dataURL 交给模板渲染，体积小、无原生依赖 |
+| `@paper-design/shaders-react` | 默认主题的背景 shader | **锁死精确版本 `0.0.81`，不加 `^`**：它还是 `0.0.x`，随小版本破坏 API 是允许的。dist 按 shader 分文件，只 import `grain-gradient` 时实际增量很小 |
 | ~~`ogl`~~ | ~~Aurora 背景~~ | **已卸载**：D18 改为纯 CSS 后不再需要 |
 
 **已明确不引入**：`lunar-javascript`（农历/节气改为静态表 + 按需手算，避免为一个 P2 功能背一个数据包）、
@@ -268,7 +281,7 @@ npx shadcn@latest add https://reactbits.dev/r/<Name>-TS-TW
 | `/` | `src/app/page.tsx` | 落地页：Hero（只放最近一个日期）+ 进行中区块 + 功能区 + 收尾 CTA |
 | `/countdowns/` | `src/app/countdowns/page.tsx` | 统计 + 搜索 + 标签筛选 + 排序 + 分区列表（进行中 / 法定节假日 / 我的事件 / 已结束） |
 | `/pomodoro/` | `src/app/pomodoro/page.tsx` | 番茄工作法：翻牌计时 + 可配置时长与轮次 + 大屏浮层（含浏览器全屏）+ 今日统计 |
-| `/fullscreen/` | `src/app/fullscreen/page.tsx` | 单目标翻牌大屏，左右切换，键盘 ←/→，Esc 退出 |
+| `/fullscreen/` | `src/app/fullscreen/page.tsx` | 单目标翻牌大屏，左右切换，键盘 ←/→；**Esc 只退原生全屏、人留在页面上**（与顶栏「退出大屏」按钮同义，F 由全局快捷键负责离开本页） |
 | `not-found` | 自动 | 极简 |
 
 **全局浮层必须每页都挂**：`EventFormDialog`、`ExportDialog`、`SettingsSheet`
@@ -850,6 +863,7 @@ isWorkday(d) =
 Countdown/
 ├─ .github/workflows/deploy.yml
 ├─ scripts/generate_icons.py      # PWA 图标生成器（纯标准库）
+├─ scripts/build-pages.mjs        # 钉死 basePath 的构建入口（等价 CI，见红线 20）
 ├─ components.json                # shadcn 配置（React Bits 走同一个 CLI）
 ├─ next.config.ts                 # output:'export' + basePath + trailingSlash
 ├─ postcss.config.mjs / tsconfig.json / vitest.config.ts
@@ -860,8 +874,8 @@ Countdown/
 │  └─ icons/{icon-192,icon-512,icon-512-maskable,apple-touch-icon}.png
 ├─ src/
 │  ├─ app/
-│  │  ├─ layout.tsx               # 字体(Space Grotesk)、metadata、<Backdrop/>、I18n/SW/Hydration 包裹
-│  │  ├─ globals.css              # @theme token（Diamond Storm）+ Aura 三层 + 工具类 + 大屏动画
+│  │  ├─ layout.tsx               # 字体(Space Grotesk)、metadata、首屏外观内联脚本、<Backdrop/>、I18n/SW/Hydration 包裹
+│  │  ├─ globals.css              # @theme token + 工具类 + 四套主题背景层与 token 块（文件末尾）+ 大屏动画
 │  │  ├─ manifest.ts              # PWA manifest（构建期注入 basePath）
 │  │  ├─ page.tsx                 # 首页 = 落地页（Hero + 进行中 + 功能区 + 收尾 CTA）
 │  │  ├─ countdowns/page.tsx      # 全部倒计时列表
@@ -869,7 +883,7 @@ Countdown/
 │  │  └─ fullscreen/page.tsx      # 大屏展示模式
 │  ├─ components/
 │  │  ├─ reactbits/*              # 30 个上游生成物，统一 @ts-nocheck，默认导出
-│  │  ├─ layout/{Backdrop,TopBar,SiteFooter,ContactDialog}.tsx
+│  │  ├─ layout/{Backdrop,GrainGradientBackdrop,TopBar,SiteFooter,ContactDialog}.tsx
 │  │  ├─ home/{FeatureSection,ClosingSection}.tsx
 │  │  ├─ holiday/{HolidayHero,OngoingSection,HolidayCard}.tsx
 │  │  ├─ events/{EventCard,EventFormDialog}.tsx
@@ -888,12 +902,13 @@ Countdown/
 │  ├─ lib/
 │  │  ├─ holidays/{types.ts,index.ts,accents.ts,data/2026.ts,data/2027.ts}
 │  │  ├─ {countdown,recurrence,recurrence-label,occurrence,workdays,milestones,tags,time,utils}.ts
-│  │  ├─ {uuid,clipboard,chime,pomodoro}.ts   # 非安全上下文降级 / 提示音 / 番茄钟纯逻辑
+│  │  ├─ {uuid,clipboard,chime,pomodoro,appearance}.ts   # 非安全上下文降级 / 提示音 / 番茄钟纯逻辑 / 外观落地
+│  │  ├─ storage-keys.ts          # localStorage 键名（中性模块，服务端链路可安全 import，见红线 19）
 │  │  └─ export/{types,templates-registry,card-model,to-image,ics,download}.ts
 │  ├─ store/{countdown-store,pomodoro-store,ui-store,debounced-storage}.ts
 │  ├─ hooks/{use-now,use-hydrated,use-today-stats,use-media-query,use-prefers-reduced-motion}.ts
 │  └─ types/index.ts
-├─ tests/{countdown,workdays,recurrence,milestones,ics,format,pomodoro}.test.ts
+├─ tests/{countdown,workdays,recurrence,milestones,ics,format,pomodoro,appearance}.test.ts
 └─ AGENTS.md
 ```
 
@@ -916,21 +931,30 @@ Countdown/
 | `ics.ts` | 折行、转义、UTC + `VALUE=DATE` | ✅ |
 | `format.ts` | 单日区间不显示成区间、`formatDateRangeFull` 跨年省略、农历自然日边界、窄星期仅中文 | ✅ |
 | `pomodoro.ts` | 长休息触发时机（第 4 个而非第 5 个）、手动跳过不计入、循环序号不跳到 5、秒数向上取整、配置夹取、跨天键 | ✅ |
+| `appearance.ts` | **首屏内联脚本与 `applyAppearance` 在 4×3×3×3 组合下产出完全一致**、默认档位要摘掉属性而不是留 `default`、"没有存档"与"存档读不出设置"要分开处理、**内联脚本里的 storage key 是真实字面量而不是 `undefined`** | ✅ |
 
-合计 **80 条**，`npm run test` 全绿。新增纯函数必须同步补测——`format.ts` 这类
+合计 **96 条**，`npm run test` 全绿。新增纯函数必须同步补测——`format.ts` 这类
 「输出被人眼当契约」的模块尤其容易静默回归（单日区间 bug 就是这么漏出去的）；
 `pomodoro.ts` 则是「差一个数整个节奏就废了」的典型，长休息的触发时机必须有断言。
+`appearance.ts` 守的是「同一套逻辑的两份实现不能漂移」——首屏脚本必须在 React 之前跑，所以没法复用同一个函数。
 
 ### 10.2 交付前自检
 
 - [ ] `npm run typecheck` → 0 error
 - [ ] `npm run lint` → 0 error（**注意：脚本尚未添加**，见 §14 附注）
-- [ ] `npm run test` → 全绿（80 条）
-- [ ] `CODEBUDDY_SAFE_DELETE_ENABLED=0 npm run build` → 0 error
+- [ ] `npm run test` → 全绿（96 条）
+- [ ] `CODEBUDDY_SAFE_DELETE_ENABLED=0 npm run build:pages` → 0 error
       （构建会大量删 `.next`，被 safe-delete 包装拦下时报的是
       `SAFE_DELETE_BULK_CONFIRM_REQUIRED`，跟代码无关）
-- [ ] 无头 Chrome 在**局域网 IP** 上跑一次真实点击（`/.preview/verify/e2e-round3.mjs`）
-- [ ] `NEXT_PUBLIC_BASE_PATH=/Countdown npm run build` → 成功，`out/index.html` 存在
+- [ ] 无头 Chrome 跑一次 `node .preview/verify/e2e-round4.mjs`（自带静态服务 + Chrome，
+      四主题 / 字号 / 字色 / 防闪 / 大屏 Esc / 网络层 404 共 62 项）
+- [ ] 四套主题各切一次：`<html data-theme>` 正确、背景层只剩当前主题那一组 `display:block`、**无 console error**（`grain` 会创建 WebGL context，切走时必须卸载）
+- [ ] 字号三档各切一次：`--fs-scale` 生效，且**间距类（`px-4`/`py-9`）与首屏高度都不变**
+- [ ] 刷新时首屏不闪：把主题设成 `golden` 后硬刷新，第一帧就应该是浅色（靠 `<head>` 内联脚本，见红线 18）
+      —— `e2e-round4.mjs` 会用 `Page.addScriptToEvaluateOnNewDocument` 记录
+      `<html data-theme>` 的**历史值序列**，首个非空值必须是 `golden` 且 `readyState` 为 `loading`
+- [ ] `npm run build:pages` → 成功，`out/index.html` 存在，且 `out/index.html` 里的
+      资源引用带 `/Countdown` 前缀（漏了就整站 404，见红线 20）
 - [ ] 本地以子路径静态伺服 `out/`，三个路由与静态资源无 404
 - [ ] 无头 Chrome 走一遍：首页 / 列表 / 大屏各无 console error；导出卡片 PNG 为 1080×1080
 - [ ] Lighthouse（移动）Performance ≥ 85、Accessibility ≥ 95
@@ -942,7 +966,19 @@ Countdown/
 
 ### 11.1 背景层看起来不对时的排查顺序
 
-背景是 `<Backdrop>`（纯静态，无需 `'use client'`）：三层纯 CSS Aura（`.aura-layer-1/2/3`）+ SVG 颗粒（`.aura-grain`）+ 压暗面纱（`.aura-veil`）。**没有 WebGL**。
+背景是 `<Backdrop>`（服务端组件，无需 `'use client'`）：**四套主题的层全部挂在 DOM 里**，靠 `<html data-theme>` 决定谁 `display:block`——
+```
+.aura-base                 铺 --color-base，合成基准（必须有）
+[data-tx=grain] ×2         .aura-fallback-1/2，CSS 近似
+<GrainGradientBackdrop/>   仅 grain 且已 hydrate 时才挂（WebGL）
+[data-tx=golden] ×2        .aura-g1/g2
+[data-tx=blueprint] ×3     .bp-l1/2/3
+[data-tx=aurora] ×6        .abo-l1…l6
+.aura-veil                 压暗面纱（--veil，浅色主题为 transparent）
+.aura-grain                SVG feTurbulence 颗粒（--grain-opacity）
+```
+`display:none` 的层不参与渲染、blur 也不计算，所以"全放"成本接近零；
+换来的是 SSR 出来的 HTML 与主题无关，首屏一定正确，不会有 hydration 差异。
 
 若背景看起来「发灰 / 发白 / 太暗 / 整个糊掉」：
 
@@ -951,7 +987,10 @@ Countdown/
 3. 检查容器有没有显式 `min-height`（红线 2）。绝对定位子层不贡献高度，漏了就会「背景只出现在首屏上面一截」。
 4. 检查是否有父元素设了 `isolation: isolate` / `transform` / `filter`——会创建新的层叠上下文，让 `mix-blend-mode` 的参照物改变。
 5. **背景发灰/发白**：九成是容器被塞了 `background-color`，导致 `mix-blend-mode` 的合成基准变成容器本身（红线 1）。另外 `.aura-veil` 是压暗层——嫌暗只调它的 alpha，别动三层渐变。
-6. 本地 WebGL 正常但导出卡片是透明板 → 那是导出链路的问题，不是背景的问题（见 §8.8 红线 11/12）。
+6. **整个背景不见了**：先看 `<html>` 上有没有 `data-theme`。没写上时只有 `:root:not([data-theme]) [data-tx='grain']` 兜底——若连默认主题的层也不显示，检查 `globals.css` 里那组 `display:block` 的门是否被后面的规则覆盖。
+7. **浅色主题下 multiply 层变成一块白斑**：说明 `.aura-base` 掉了或没铺满。`multiply` 面对透明画布会退化成 `normal`，必须有一个真实的底。
+8. **切到某个主题时看到别的主题的颜色**：检查 token 块是否被套进了 `@layer`——`@theme` 在 `@layer theme` 里，而**无 layer 的规则才赢**，主题块必须裸写在文件末尾。
+9. 本地 WebGL 正常但导出卡片是透明板 → 那是导出链路的问题，不是背景的问题（见 §8.8 红线 11/12）。导出模板本就与主题无关（D23），别顺手接上 token。
 
 ### 11.2 避免 hydration mismatch
 
@@ -1032,6 +1071,57 @@ useEffect(() => {
 
 ---
 
+### 11.8 主题系统为什么能"组件一行不改"
+
+**支点是 Tailwind v4 的输出形态。** 构建产物里工具类是
+
+```css
+.text-ink-2{color:var(--color-ink-2)}
+.border-line{border-color:var(--color-line)}
+.bg-elev{background-color:var(--color-elev)}
+```
+
+而不是 `color:#a1a1aa`。所以只要改写根上的变量，全站自动跟随。
+
+**级联靠两重保险**：`@theme` 的 token 落在 `@layer theme` 里，而主题块是**无 layer** 的——
+在级联中无 layer 的声明胜过任何 layer；同时 `:root[data-theme='x']`（0,2,0）的特异性
+本来就高于 `:root`（0,1,0）。**因此主题块绝对不能套进 `@layer`**，套进去就被 `@theme` 反压。
+
+**四套主题**（`Settings.theme`）：
+
+| id | 类型 | 底色 | 背景层 |
+| --- | --- | --- | --- |
+| `grain` | WebGL `GrainGradient` + CSS 近似兜底 | `#000000` | `.aura-fallback-1/2` + shader |
+| `golden` | CSS，浅色 | `#faf8f2` | `.aura-g1/g2`（两层 multiply） |
+| `blueprint` | CSS | `#100e0b` | `.bp-l1/l2/l3` |
+| `aurora` | CSS | `#100e0b` | `.abo-l1…l6` + 颗粒 |
+
+**浅色主题的成本分布**（这也是为什么它是最贵的一套）：`surface-1..4` / `hairline-*` 要整体反向；
+`::selection`、滚动条、`input[type=date]` 的日历图标、`.flip-seam` / `.flip-inset`（翻牌中缝与投影）、
+`.vignette`、`.masked-title`、节日徽章与番茄钟阶段色都要各给一版。**深色主题之间几乎零成本**——
+同构，换一套渐变参数即可。
+
+**首屏防闪烁**（红线 18）：`<head>` 里的内联脚本（`APPEARANCE_BOOTSTRAP`）在 React 之前读
+`localStorage['countdown:v1']`，直接写 `<html data-theme>` / `data-heading` / `data-body-tone` / `--fs-scale`
+与 `<meta name="theme-color">`。**运行时那份是 `applyAppearance`，必须与脚本逐项对齐**，
+`tests/appearance.test.ts` 穷举 4×3×3×3 组合在守这条。
+另外 `StoreHydration` 里**没有"挂载即写"**——只在 `rehydrate()` 完成后才写，
+否则会用默认值覆盖脚本刚设好的值，浅色用户就闪一帧深色。
+
+**`WebGL` 的两个 gate**：`GrainGradientBackdrop` 必须同时满足「已挂载」「store 已 hydrate」
+「当前主题是 grain」才挂载，否则会白占一个上下文；`reduceMotion` 或系统
+`prefers-reduced-motion` 任一命中就用 `speed={0}` 冻结成静态帧（而不是放慢——慢速漂移照样分心）。
+
+**刻意不跟随主题的地方**（改之前先想清楚）：
+- 导出模板（D23，全部硬编码）
+- 番茄钟的 `BorderGlow` 面板与它内部那个 `StarBorder` 按钮：面板在所有主题下都是深色的
+  "仪表盘"，里面的浅色文字/蓝色按钮因此始终成立。**不要**把它们换成 `--color-ink` 之类的 token，
+  否则浅色主题下会变成深字配深底。
+- `ClickSpark` 的火花、`SpotlightCard` 的 `spotlightColor`：前者用 canvas 绘制、后者是
+  TS 字面量类型，都拿不到 `var()`，保持 hex。
+
+---
+
 ## 12. 可访问性
 
 - 装饰层 `aria-hidden` + `pointer-events: none`（已含在 §4.3）
@@ -1059,6 +1149,7 @@ useEffect(() => {
 
 > 2026-09-21 已拍板：主倒计时用**方案 A**、**不做**「今日速览」统计块、**Hero 占满首屏**、PWA 走**手写方案**、2027 走**法定节假日口径且无角标**。
 > 2026-09-22 追加：**Diamond Storm 主题**、**中英双语**、三页结构（删 `/settings`）、React Bits、Space Grotesk。
+> 2026-09-23 追加：**四套可切换主题**（D5/D23）、**字号档位方案 A**（D24）、**字色档位**（D25）、修掉大屏 Esc 的空头承诺。
 
 | # | 问题 | 结论 | 状态 |
 | --- | --- | --- | --- |
@@ -1074,6 +1165,10 @@ useEffect(() => {
 | 10 | 时区 | 锁 UTC+8；非中国时区用户看到的仍是北京时间，页脚注明 | ✅ 已定（D4） |
 | 11 | 视觉主题 | **Diamond Storm**（`#100e0b` + `#60a5fa`），取代 Cosmic Ash | ✅ 已定（D13） |
 | 12 | 国际化 | 中英双语客户端字典，用户可切，不做 URL 路由 | ✅ 已定（D14/D15） |
+| 13 | 外观可配置粒度 | **全局一档**：一套字号档位 + 一套字色档位，全站统一；**不做按页面 / 按元素** | ✅ 已定（D24/D25） |
+| 14 | 导出卡片是否跟随主题 | **不跟随**，固定 Diamond Storm | ✅ 已定（D23） |
+| 15 | 浅色主题的强调色 | **暖琥珀 `#92400e`**（现品牌蓝在奶油底上只有 ~2.9:1） | ✅ 已定（§11.8） |
+| 16 | 默认主题取色 | 海军给定：`["#7300ff","#eba8ff","#00bfff","#2b00ff"]` + `colorBack="#000000"` + `shape="corners"` | ✅ 已定（D5） |
 
 **当前无阻塞项。** 上一版遗留的「中文字体是否随仓库提交」已随 D19 关闭——展示字体走
 `next/font/google` 构建期自托管，中文用系统栈，仓库里不放字体文件。

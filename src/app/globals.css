@@ -45,6 +45,21 @@
   --color-tag-payday: #c084fc;
   --color-tag-holiday: #f472b6;
 
+  /* ---- 表面层级 ----
+   * 这四个值原本是散在组件里的 `bg-white/[0.035]` 这类硬编码。
+   * 浅色主题需要把它们整体反向（白 alpha → 黑 alpha），
+   * 所以必须收成 token，否则浅底上所有卡片会糊成一片灰。
+   */
+  --color-surface-1: rgba(255, 255, 255, 0.015);
+  --color-surface-2: rgba(255, 255, 255, 0.035);
+  --color-surface-3: rgba(255, 255, 255, 0.06);
+  --color-surface-4: rgba(255, 255, 255, 0.08);
+  --color-hairline-soft: rgba(255, 255, 255, 0.055);
+  --color-hairline-strong: rgba(255, 255, 255, 0.12);
+
+  /* 「最高对比」档字色：深色主题下是纯白，浅色主题下必须换成近黑 */
+  --color-ink-max: #ffffff;
+
   /* ---- 字体 ---- */
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
@@ -68,6 +83,38 @@
    */
   --animate-star-movement-bottom: star-movement-bottom 6s linear infinite alternate;
   --animate-star-movement-top: star-movement-top 6s linear infinite alternate;
+}
+
+/*
+ * 非 Tailwind 命名空间的自定义属性。
+ * 不放进 @theme：那边是给工具类生成用的，这些只是被工程内部消费。
+ */
+:root {
+  /*
+   * 全局字号缩放（外观设置「字号档位」）。
+   * 只被 `text-[calc(Npx*var(--fs-scale))]` 引用——刻意不接 rem，
+   * 这样间距与首屏高度预算都不会跟着动。
+   */
+  --fs-scale: 1;
+
+  /* 翻牌实体感的四个细节，浅色翻牌面要换一整套 */
+  --flip-seam: rgba(0, 0, 0, 0.55);
+  --flip-seam-edge: rgba(255, 255, 255, 0.045);
+  --flip-inset: rgba(255, 255, 255, 0.07);
+  --flip-drop: rgba(0, 0, 0, 0.42);
+
+  /* 原生日期控件的日历图标：深底反色，浅底不反 */
+  --date-picker-filter: invert(1) opacity(0.45);
+
+  /* 压暗面纱（背景层专用），每套主题各自定 */
+  --veil: rgba(16, 14, 11, 0.34);
+  /* 胶片颗粒强度，浅色主题要调低，否则奶油底会显脏 */
+  --grain-opacity: 0.85;
+
+  /* 番茄钟三个阶段色。默认蓝/绿/青，浅色主题下必须换深一档 */
+  --tc-focus: #60a5fa;
+  --tc-short: #34d399;
+  --tc-long: #2dd4bf;
 }
 
 @keyframes star-movement-bottom {
@@ -112,7 +159,7 @@
   }
 
   ::selection {
-    background: rgba(96, 165, 250, 0.32);
+    background: color-mix(in srgb, var(--color-accent) 32%, transparent);
     color: var(--color-ink);
   }
 
@@ -125,7 +172,7 @@
   /* 细滚动条，避免在暗底上出现突兀的亮色滑轨 */
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+    scrollbar-color: var(--color-hairline-strong) transparent;
   }
 
   ::-webkit-scrollbar {
@@ -138,14 +185,14 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--color-hairline-strong);
     border-radius: 999px;
     border: 3px solid transparent;
     background-clip: content-box;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.22);
+    background: var(--color-line-strong);
     background-clip: content-box;
   }
 
@@ -160,7 +207,7 @@
 
   input[type="date"]::-webkit-calendar-picker-indicator,
   input[type="time"]::-webkit-calendar-picker-indicator {
-    filter: invert(1) opacity(0.45);
+    filter: var(--date-picker-filter);
     cursor: pointer;
   }
 }
@@ -224,91 +271,77 @@
     overflow: hidden;
   }
 
-  /* ---------------- Aura 背景（Diamond Storm） ---------------- */
-
-  .aura-layer-1,
-  .aura-layer-2,
-  .aura-layer-3,
-  .aura-grain {
+  /* ---------------- 背景层骨架（四套主题共用） ----------------
+   *
+   * 四套主题的层全部挂在 DOM 里，靠 [data-theme] 决定谁 display:block。
+   * display:none 的层不参与渲染，blur 也不会被计算，所以放全四套是零成本；
+   * 换来的是「服务端吐出的 HTML 与主题无关」——首屏一定是对的，不会有 hydration 差异。
+   *
+   * 各层自己的 background / mix-blend-mode / blur 见文件末尾的主题块。
+   */
+  .bg-canvas > [data-tx] {
     position: absolute;
     inset: 0;
+    display: none;
     pointer-events: none;
     transform: translateZ(0);
     will-change: transform;
   }
 
-  /* 层 1：底部中央涌起的深蓝辉光 */
-  .aura-layer-1 {
-    background: radial-gradient(
-      55.8% 55.49% at 50% 100%,
-      rgb(20, 60, 120) 0%,
-      rgba(10, 30, 80, 0) 100%
-    );
-    mix-blend-mode: screen;
+  /*
+   * 底色托底。
+   *
+   * 为什么必须在背景组**内部**再铺一层底色：`.bg-canvas` 是 `z-index:0` 的定位元素，
+   * 自身就是一个层叠上下文，`mix-blend-mode` 的合成基准被限制在它内部。
+   * 若不托底，multiply 层面对的是一张透明画布，会退化成 normal ——
+   * 金色时刻那两层 multiply 会直接变成一块白斑。
+   *
+   * 托底之后四套主题的 blend mode 才真正按各自配方的意图工作。
+   * 它铺的是 `--color-base`，与 body 同色，所以看起来什么都没有。
+   */
+  .aura-base {
+    position: absolute;
+    inset: 0;
+    background: var(--color-base);
   }
 
-  /* 层 2：斜向"钻石切面"条纹，大模糊后化为光束 */
-  .aura-layer-2 {
-    background:
-      repeating-linear-gradient(
-        100deg,
-        #041022 0%,
-        #041022 3%,
-        rgba(20, 60, 120, 0.7) 5%,
-        rgba(20, 60, 120, 0.7) 7%,
-        transparent 10%,
-        transparent 12%,
-        rgba(20, 60, 120, 0.7) 14%,
-        #041022 16%
-      ),
-      repeating-linear-gradient(
-        100deg,
-        #b3e5ff 0%,
-        #b3e5ff 1.5%,
-        rgba(179, 229, 255, 0.8) 2%,
-        #2563eb 3%,
-        #2563eb 4%,
-        rgba(179, 229, 255, 0.8) 4.5%,
-        #b3e5ff 5%
-      );
-    background-size: 300% 200%;
-    mix-blend-mode: screen;
-    filter: blur(75px);
-    opacity: 0.9;
+  /* data-theme 还没写上时（脚本被禁 / 还没跑完）退到默认主题，别让背景整个空掉 */
+  :root:not([data-theme]) .bg-canvas > [data-tx='grain'],
+  :root[data-theme='grain'] .bg-canvas > [data-tx='grain'],
+  :root[data-theme='golden'] .bg-canvas > [data-tx='golden'],
+  :root[data-theme='blueprint'] .bg-canvas > [data-tx='blueprint'],
+  :root[data-theme='aurora'] .bg-canvas > [data-tx='aurora'] {
+    display: block;
   }
 
-  /* 桌面用更大的模糊半径，让条纹彻底融成光雾 */
-  @media (min-width: 768px) {
-    .aura-layer-2 {
-      filter: blur(108px);
-    }
+  /* WebGL 背景的宿主：铺满、不拦事件，本身完全透明 */
+  .grain-gradient-host {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
   }
 
-  /* 层 3：右下角压暗，给整幅画面一个方向性的落点 */
-  .aura-layer-3 {
-    background: radial-gradient(ellipse at 100% 100%, #ffffff 20%, #00030a 80%);
-    mix-blend-mode: multiply;
-  }
-
-  /* 颗粒：SVG feTurbulence 噪声，overlay 混合，制造胶片质感 */
+  /* 颗粒：SVG feTurbulence 噪声，overlay 混合，制造胶片质感（四套主题共用） */
   .aura-grain {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
     mix-blend-mode: overlay;
-    opacity: 0.85;
-    will-change: auto;
+    opacity: var(--grain-opacity);
   }
 
   /*
-   * 暗化面纱——对上游 Diamond Storm 配方的唯一偏离。
+   * 面纱层——对上游配方的唯一偏离。
    *
-   * 三层叠加后画面右侧偏亮（L3 的 multiply 在右下是白色，等于不压暗），
-   * 而正文用的 ink-2 #a1a1aa 在亮区只有 2.7:1，完全不够看。
-   * 这里补一层与底色同源的均匀暗罩：蓝调氛围保留，正文重新回到可读区间。
-   * 若日后嫌暗，只调这一个 alpha 即可，不必动三层渐变。
+   * 高饱和背景叠加后正文区域的对比度会掉到 3:1 以下（`ink-2` 首当其冲），
+   * 这里补一层与底色同源的均匀暗罩：氛围保留，正文重新回到可读区间。
+   * 浓度见各主题的 --veil；金色时刻是浅底，直接不压（transparent）。
    */
   .aura-veil {
     position: absolute;
     inset: 0;
-    background: rgba(16, 14, 11, 0.34);
+    background: var(--veil);
     pointer-events: none;
   }
 
@@ -321,7 +354,7 @@
 
   /* 玻璃卡片：国外产品页最常见的一档 */
   .surface {
-    background: rgba(255, 255, 255, 0.035);
+    background: var(--color-surface-2);
     border: 1px solid var(--color-line);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
@@ -339,7 +372,7 @@
   }
 
   .surface-hover:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--color-surface-3);
     border-color: var(--color-line-strong);
   }
 
@@ -353,13 +386,24 @@
     background: linear-gradient(
       90deg,
       transparent,
-      rgba(255, 255, 255, 0.18) 50%,
+      var(--color-line-strong) 50%,
       transparent
     );
     pointer-events: none;
   }
 
-  /* ---------------- 排版 ---------------- */
+  /* ---------------- 排版 ----------------
+   *
+   * 字号档位（--fs-scale）的作用范围就是下面这条规则：
+   *   「**写死尺寸的字跟着缩放；本来就是 vw 响应的 clamp 不缩放**」。
+   *
+   * 两类刻意排除，各有硬理由：
+   *  · .display-hero —— 首屏高度预算是 `calc(100svh - 68px)`，
+   *    再放大 8% 会把下方两个按钮挤出折线（红线 8：首屏高度预算不容推翻）。
+   *  · .flip-clock / .tomato-clock —— 上限是按「最窄 1024px、3 列网格、
+   *    三位数天数」反推的，已经贴到卡片内边距，再放就顶出去。
+   * 这两类本来就是随视口自适应的，不缩放也不会显得"点了没反应"。
+   */
 
   /* 落地页首屏标题：比 display-xl 更重、更紧，用于"每个假期，都值得倒数" */
   .display-hero {
@@ -373,7 +417,7 @@
   /* 大标题：紧字距 + 收紧行高 */
   .display-xl {
     font-family: var(--font-display);
-    font-size: clamp(2.75rem, 7vw, 5.5rem);
+    font-size: calc(clamp(2.75rem, 7vw, 5.5rem) * var(--fs-scale));
     line-height: 0.98;
     letter-spacing: -0.035em;
     font-weight: 500;
@@ -381,7 +425,7 @@
 
   .display-lg {
     font-family: var(--font-display);
-    font-size: clamp(2rem, 4.6vw, 3.25rem);
+    font-size: calc(clamp(2rem, 4.6vw, 3.25rem) * var(--fs-scale));
     line-height: 1.05;
     letter-spacing: -0.03em;
     font-weight: 500;
@@ -389,7 +433,7 @@
 
   .display-md {
     font-family: var(--font-display);
-    font-size: clamp(1.5rem, 2.6vw, 2rem);
+    font-size: calc(clamp(1.5rem, 2.6vw, 2rem) * var(--fs-scale));
     line-height: 1.15;
     letter-spacing: -0.02em;
     font-weight: 500;
@@ -398,7 +442,7 @@
   /* 微标签：全大写 + 宽字距，精密仪器质感 */
   .label-mono {
     font-family: var(--font-mono);
-    font-size: 0.6875rem;
+    font-size: calc(0.6875rem * var(--fs-scale));
     line-height: 1.4;
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -420,7 +464,7 @@
     background: radial-gradient(
       ellipse 80% 60% at 50% 0%,
       transparent 30%,
-      rgba(16, 14, 11, 0.55) 100%
+      color-mix(in srgb, var(--color-base) 55%, transparent) 100%
     );
     pointer-events: none;
   }
@@ -450,7 +494,7 @@
   .masked-title {
     letter-spacing: 0.12em;
     color: transparent;
-    text-shadow: 0 0 10px rgba(244, 244, 245, 0.55);
+    text-shadow: 0 0 10px color-mix(in srgb, var(--color-ink) 55%, transparent);
     user-select: none;
   }
 
@@ -500,7 +544,56 @@
   }
 
   .ring-accent-soft {
-    box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.4);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-accent) 40%, transparent);
+  }
+
+  /* ---------------- 主题色卡（设置面板） ----------------
+   * 纯装饰：一眼看出每套主题的走向。真实配色一律以文件末尾的主题块为准。
+   */
+  .theme-swatch {
+    width: 22px;
+    height: 22px;
+    flex: none;
+    border-radius: 999px;
+    border: 1px solid var(--color-line-strong);
+  }
+
+  .theme-swatch[data-swatch='grain'] {
+    background: linear-gradient(135deg, #7300ff 0%, #00bfff 58%, #eba8ff 100%);
+  }
+  .theme-swatch[data-swatch='golden'] {
+    background: linear-gradient(135deg, #faf8f2 0%, #ffb74d 55%, #ff8a3d 100%);
+  }
+  .theme-swatch[data-swatch='blueprint'] {
+    background: linear-gradient(135deg, #100e0b 0%, #0ea5e9 62%, #06b6d4 100%);
+  }
+  .theme-swatch[data-swatch='aurora'] {
+    background: linear-gradient(135deg, #100e0b 0%, #00e5ff 42%, #49cf9e 72%, #593e97 100%);
+  }
+
+  /* ---------------- 节日彩色徽章 ---------------- */
+
+  /*
+   * 色相由 `lib/holidays/accents.ts` 按节日算出来，通过内联的 `--ha` 传进来。
+   *
+   * 为什么不在组件里直接写内联颜色：那套色相是按深色底选的（明度中高），
+   * 放到奶油底上对比度只有 1.5:1 左右，几乎看不见。色相留在 CSS 里，
+   * 就能给浅色主题单独压一档 —— 色相不变，只调明度。
+   */
+  .holiday-pill {
+    --ha-ink: var(--ha);
+    border-color: color-mix(in oklab, var(--ha-ink) 30%, transparent);
+    background-color: color-mix(in oklab, var(--ha-ink) 12%, transparent);
+    color: var(--ha-ink);
+  }
+
+  .holiday-pill__dot {
+    background-color: var(--ha-ink);
+  }
+
+  /* 浅底上把色相往近黑方向拉，色相保留、对比度回到可读区间 */
+  :root[data-theme='golden'] .holiday-pill {
+    --ha-ink: color-mix(in oklab, var(--ha) 46%, #17110a);
   }
 
   /* ---------------- 翻牌数字 ---------------- */
@@ -556,7 +649,7 @@
 
   /* 卡片档的单位标签同步放大一档，不然会被数字压得看不见 */
   .flip-clock[data-tone='card'] .flip-clock__label {
-    font-size: 11.5px;
+    font-size: calc(11.5px * var(--fs-scale));
   }
 
   .flip-clock[data-tone='screen'] {
@@ -583,8 +676,8 @@
     vertical-align: bottom;
     background: linear-gradient(180deg, var(--color-face-top) 0%, var(--color-face-bottom) 100%);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.07),
-      0 0.05em 0.16em rgba(0, 0, 0, 0.42);
+      inset 0 1px 0 var(--flip-inset),
+      0 0.05em 0.16em var(--flip-drop);
   }
 
   /* 中缝：一道高光压在暗缝上，翻牌的"实体感"主要来自这里 */
@@ -596,8 +689,8 @@
     left: 0;
     width: 100%;
     height: 1px;
-    background: rgba(0, 0, 0, 0.55);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.045);
+    background: var(--flip-seam);
+    box-shadow: 0 1px 0 var(--flip-seam-edge);
     pointer-events: none;
   }
 
@@ -693,7 +786,7 @@
 
   /* 未 hydrate 时的占位格：只给出布局尺寸，不留数字 */
   .flip-tile--ghost {
-    background: rgba(255, 255, 255, 0.035);
+    background: var(--color-surface-2);
     box-shadow: none;
   }
 
@@ -737,13 +830,13 @@
    * 挂在 data-phase 上，一套声明同时服务面板与大屏两种尺寸。
    */
   .tomato-clock[data-phase='focus'] {
-    --tc-accent: #60a5fa;
+    --tc-accent: var(--tc-focus);
   }
   .tomato-clock[data-phase='short'] {
-    --tc-accent: #34d399;
+    --tc-accent: var(--tc-short);
   }
   .tomato-clock[data-phase='long'] {
-    --tc-accent: #2dd4bf;
+    --tc-accent: var(--tc-long);
   }
 
   /* 多一层 .tomato-clock 提高特异性，稳压 .flip-tile--accent 的默认蓝色 */
@@ -777,4 +870,397 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
+}
+
+/* ============================================================================
+ * 背景层的具体画法
+ *
+ * 这里全部用不带作用域的单类选择器，不加 `[data-theme]` 前缀 ——
+ * 可见性已经由上面 `.bg-canvas > [data-tx]` 那组规则按主题 gate 住了，
+ * 再套一层前缀只是重复。
+ * ========================================================================== */
+
+/* ---------------------------------------------------------------- 默认主题的 CSS 近似
+ * 两个径向色斑，色相取自 shader 的 colors 数组（#7300ff / #eba8ff / #00bfff / #2b00ff）。
+ * 它有两个身份：首屏未 hydrate 时的占位，以及 WebGL 不可用时的永久降级。
+ * 不追求和 shader 一模一样，只求"一眼是同一套配色"。
+ */
+.aura-fallback-1 {
+  background:
+    radial-gradient(
+      58% 52% at 20% 28%,
+      rgba(115, 0, 255, 0.62) 0%,
+      rgba(43, 0, 255, 0.22) 46%,
+      transparent 74%
+    ),
+    radial-gradient(
+      52% 48% at 80% 72%,
+      rgba(0, 191, 255, 0.46) 0%,
+      transparent 72%
+    );
+}
+
+.aura-fallback-2 {
+  background:
+    radial-gradient(42% 38% at 64% 20%, rgba(235, 168, 255, 0.34) 0%, transparent 72%),
+    radial-gradient(60% 40% at 50% 104%, rgba(43, 0, 255, 0.30) 0%, transparent 76%);
+  filter: blur(40px);
+}
+
+/* ---------------------------------------------------------------- 主题 1：Golden Hour
+ * 浅色 aura。两层都是 multiply，靠 `.aura-base` 的 #faf8f2 做合成基准。
+ * 注意 Layer 1 的色标顺序是上游给的原始值（18% 排在 28% 之后），
+ * 按"照抄"处理：CSS 会把那个 18% 钳到 28%。
+ */
+.aura-g1 {
+  background: linear-gradient(
+    rgba(0, 0, 0, 0) 0%,
+    rgba(255, 183, 77, 0.12) 28%,
+    rgb(255, 255, 255) 18%,
+    rgb(255, 138, 61) 68%,
+    rgb(183, 77, 0) 100%
+  );
+  mix-blend-mode: multiply;
+  filter: blur(125px);
+}
+
+.aura-g2 {
+  background: linear-gradient(
+    rgba(0, 0, 0, 0) 0%,
+    rgba(255, 183, 77, 0.22) 34%,
+    rgb(255, 255, 255) 66%,
+    rgb(255, 138, 61) 82%,
+    rgb(183, 77, 0) 100%
+  );
+  mix-blend-mode: multiply;
+  filter: blur(100px);
+}
+
+@media (min-width: 768px) {
+  .aura-g1 {
+    filter: blur(180px);
+  }
+  .aura-g2 {
+    filter: blur(144px);
+  }
+}
+
+/* ---------------------------------------------------------------- 主题 2：Blueprint
+ * 冷调双层网格 + 一片青色辉光。前两层是 normal（直接画），只有辉光走 screen。
+ */
+.bp-l1 {
+  background:
+    linear-gradient(rgba(14, 165, 233, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14, 165, 233, 0.12) 1px, transparent 1px);
+  background-size: 50px 50px;
+  mix-blend-mode: normal;
+}
+
+.bp-l2 {
+  background:
+    linear-gradient(rgba(14, 165, 233, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14, 165, 233, 0.06) 1px, transparent 1px);
+  background-size: 10px 10px;
+  mix-blend-mode: normal;
+}
+
+.bp-l3 {
+  background: radial-gradient(
+    circle at 60% 40%,
+    rgba(6, 182, 212, 0.35) 0%,
+    transparent 45%
+  );
+  mix-blend-mode: screen;
+  filter: blur(175px);
+}
+
+@media (min-width: 768px) {
+  .bp-l3 {
+    filter: blur(252px);
+  }
+}
+
+/* ---------------------------------------------------------------- 主题 3：Aurora Borealis
+ * 六层极光：五层 screen 铺色，中间夹一层 multiply 压底部。
+ * 颗粒由上方的 .aura-grain 统一提供。
+ */
+.abo-l1 {
+  background: linear-gradient(
+    154deg,
+    transparent 18%,
+    rgba(12, 72, 61, 0.06) 29%,
+    rgba(0, 229, 255, 0.4) 36%,
+    rgb(255, 255, 255) 42%,
+    rgba(73, 207, 158, 0.32) 48%,
+    rgba(38, 158, 119, 0.22) 55%,
+    rgba(0, 183, 255, 0.3) 62%,
+    rgba(15, 76, 65, 0.08) 68%,
+    transparent 82%
+  );
+  mix-blend-mode: screen;
+  filter: blur(85px);
+}
+
+.abo-l2 {
+  background: linear-gradient(
+    128deg,
+    transparent 28%,
+    rgba(15, 82, 96, 0.06) 38%,
+    rgba(0, 183, 255, 0.35) 43%,
+    rgb(255, 255, 255) 48%,
+    rgba(68, 197, 185, 0.22) 52%,
+    rgba(0, 229, 255, 0.25) 57%,
+    rgba(25, 105, 112, 0.1) 62%,
+    transparent 76%
+  );
+  mix-blend-mode: screen;
+  filter: blur(75px);
+  opacity: 0.9;
+}
+
+.abo-l3 {
+  background: radial-gradient(
+    ellipse 78% 20% at 51% 53%,
+    rgba(65, 183, 155, 0.24) 0%,
+    rgba(30, 102, 91, 0.1) 45%,
+    transparent 82%
+  );
+  mix-blend-mode: screen;
+  filter: blur(70px);
+  opacity: 0.9;
+}
+
+.abo-l4 {
+  background: radial-gradient(
+    ellipse 48% 9% at 52% 50%,
+    rgba(190, 255, 226, 0.14) 0%,
+    rgba(91, 195, 163, 0.06) 45%,
+    transparent 80%
+  );
+  mix-blend-mode: screen;
+  filter: blur(175px);
+}
+
+.abo-l5 {
+  background: linear-gradient(
+    to top,
+    rgba(1, 5, 13, 0.9) 0%,
+    rgba(2, 7, 16, 0.58) 28%,
+    rgba(3, 9, 20, 0.2) 55%,
+    transparent 78%
+  );
+  mix-blend-mode: multiply;
+  filter: blur(80px);
+  opacity: 0.9;
+}
+
+.abo-l6 {
+  background: radial-gradient(
+    ellipse 50% 28% at 72% 18%,
+    rgba(89, 62, 151, 0.1) 0%,
+    rgba(57, 44, 100, 0.04) 45%,
+    transparent 82%
+  );
+  mix-blend-mode: screen;
+  filter: blur(138px);
+  opacity: 0.7;
+}
+
+@media (min-width: 768px) {
+  .abo-l1 {
+    filter: blur(122px);
+  }
+  .abo-l2 {
+    filter: blur(108px);
+  }
+  .abo-l3 {
+    filter: blur(101px);
+  }
+  .abo-l4 {
+    filter: blur(252px);
+  }
+  .abo-l5 {
+    filter: blur(115px);
+  }
+  .abo-l6 {
+    filter: blur(198px);
+  }
+}
+
+/* ============================================================================
+ * 四套主题的 token
+ *
+ * 这些块**刻意不加 @layer**：Tailwind 的 `@theme` 落在 `@layer theme` 里，
+ * 而无 layer 的声明在级联上胜过任何 layer；再加上 `:root[data-theme='x']`
+ * 的特异性（0,2,0）本来就高于 `:root`（0,1,0）。两重保险之下，
+ * 只要在这里覆写变量，全站 token 化的样式（`.text-ink-2{color:var(--color-ink-2)}`
+ * 这一类）就会自动跟随 —— 组件层一行都不用改。
+ *
+ * 也因此：**新增主题只需要在这里加一个块 + 在 Backdrop 里加一层背景**，
+ * 不用去动任何组件。
+ * ========================================================================== */
+
+/* -------------------------------------------------- 默认：Grain Gradient（WebGL）
+ * 底色纯黑，刻意对齐 shader 的 `colorBack="#000000"`：
+ * 这里若留暖黑 #100e0b，shader 边缘会露出一圈色差。
+ */
+:root[data-theme='grain'] {
+  color-scheme: dark;
+
+  --color-base: #000000;
+  --color-elev: #0d0d16;
+  --color-line: rgba(255, 255, 255, 0.1);
+  --color-line-strong: rgba(255, 255, 255, 0.2);
+
+  --color-face-top: #1a1630;
+  --color-face-bottom: #0f0d1c;
+
+  --color-ink: #f5f4f7;
+  --color-ink-2: #a9a7b4;
+  --color-ink-3: #82808f;
+  --color-ink-max: #ffffff;
+
+  --color-accent: #60a5fa;
+  --color-accent-deep: #2563eb;
+  --color-accent-soft: rgba(96, 165, 250, 0.18);
+  --color-accent-ink: #05060f;
+
+  /* shader 是高饱和紫蓝流动，正文对比度必须靠面纱拉回来 */
+  --veil: rgba(0, 0, 0, 0.32);
+}
+
+/* -------------------------------------------------- 主题 1：Golden Hour（浅色）
+ * 全站唯一一套浅色，也是唯一需要把 surface / line / ink 全部反向的一套。
+ */
+:root[data-theme='golden'] {
+  color-scheme: light;
+
+  --color-base: #faf8f2;
+  --color-elev: #ffffff;
+  --color-line: rgba(60, 44, 20, 0.14);
+  --color-line-strong: rgba(60, 44, 20, 0.28);
+
+  /* 浅色翻牌：上纯白、下压一层米灰，模拟同一道顶光 */
+  --color-face-top: #ffffff;
+  --color-face-bottom: #ece5d7;
+
+  --color-ink: #2a2118;
+  --color-ink-2: #6b5f4c;
+  --color-ink-3: #8b7f6c;
+  --color-ink-max: #17110a;
+
+  /* 暖琥珀：在 #faf8f2 上约 6.7:1，过 AA。原来的品牌蓝在奶油底上只有 ~2.9:1 */
+  --color-accent: #92400e;
+  --color-accent-deep: #7c2d12;
+  --color-accent-soft: rgba(146, 64, 14, 0.16);
+  --color-accent-ink: #fff7ed;
+
+  --color-alert: #b91c1c;
+  --color-warn: #a16207;
+  --color-info: #0e7490;
+
+  /* 标签色整体压深，浅底上原来的 400 号色系几乎读不出来 */
+  --color-tag-work: #1d4ed8;
+  --color-tag-life: #047857;
+  --color-tag-anniversary: #b45309;
+  --color-tag-payday: #7c3aed;
+  --color-tag-holiday: #be185d;
+
+  /* 表面层级反向：白 alpha → 黑 alpha */
+  --color-surface-1: rgba(28, 20, 8, 0.022);
+  --color-surface-2: rgba(28, 20, 8, 0.045);
+  --color-surface-3: rgba(28, 20, 8, 0.07);
+  --color-surface-4: rgba(28, 20, 8, 0.1);
+  --color-hairline-soft: rgba(28, 20, 8, 0.09);
+  --color-hairline-strong: rgba(28, 20, 8, 0.2);
+
+  --flip-seam: rgba(0, 0, 0, 0.18);
+  --flip-seam-edge: rgba(255, 255, 255, 0.9);
+  --flip-inset: rgba(255, 255, 255, 0.95);
+  --flip-drop: rgba(120, 100, 70, 0.18);
+
+  /* 日历图标在浅底上不能反色 */
+  --date-picker-filter: opacity(0.45);
+
+  /* 金色时刻是浅底：不压暗，颗粒也要收，否则奶油底会显脏 */
+  --veil: transparent;
+  --grain-opacity: 0.35;
+
+  /* 番茄钟三色在浅底上需要深一档，否则对白翻牌面只有 2 点几的对比度 */
+  --tc-focus: #92400e;
+  --tc-short: #047857;
+  --tc-long: #0f766e;
+}
+
+/* -------------------------------------------------- 主题 2：Blueprint */
+:root[data-theme='blueprint'] {
+  color-scheme: dark;
+
+  --color-base: #100e0b;
+  --color-elev: #131c26;
+  --color-line: rgba(125, 211, 252, 0.14);
+  --color-line-strong: rgba(125, 211, 252, 0.28);
+
+  --color-face-top: #16212e;
+  --color-face-bottom: #0e1620;
+
+  --color-ink: #eef6fb;
+  --color-ink-2: #9fb3c4;
+  --color-ink-3: #7b8d9e;
+
+  --color-accent: #38bdf8;
+  --color-accent-deep: #0284c7;
+  --color-accent-soft: rgba(56, 189, 248, 0.18);
+  --color-accent-ink: #04121c;
+
+  /* 网格很细、亮度低，面纱没必要压那么狠 */
+  --veil: rgba(16, 14, 11, 0.2);
+}
+
+/* -------------------------------------------------- 主题 3：Aurora Borealis */
+:root[data-theme='aurora'] {
+  color-scheme: dark;
+
+  --color-base: #100e0b;
+  --color-elev: #0f1a18;
+  --color-line: rgba(125, 240, 214, 0.14);
+  --color-line-strong: rgba(125, 240, 214, 0.28);
+
+  --color-face-top: #12241f;
+  --color-face-bottom: #0b1714;
+
+  --color-ink: #effbf7;
+  --color-ink-2: #9dbdb2;
+  --color-ink-3: #7d9c92;
+
+  --color-accent: #34d399;
+  --color-accent-deep: #0f9b7a;
+  --color-accent-soft: rgba(52, 211, 153, 0.18);
+  --color-accent-ink: #04140f;
+
+  --veil: rgba(16, 14, 11, 0.34);
+}
+
+/* ============================================================================
+ * 字色档位（外观设置）
+ *
+ * 放在主题块**之后**：两者特异性都是 (0,2,0)，靠源码顺序让字色覆盖主题默认值。
+ * ========================================================================== */
+
+/* 标题色：强调色 / 该主题下的最高对比 */
+:root[data-heading='accent'] {
+  --color-ink: var(--color-accent);
+}
+
+:root[data-heading='max'] {
+  --color-ink: var(--color-ink-max);
+}
+
+/* 正文色：更强的把正文提到标题同色，更淡的降到三级灰 */
+:root[data-body-tone='strong'] {
+  --color-ink-2: var(--color-ink);
+}
+
+:root[data-body-tone='soft'] {
+  --color-ink-2: var(--color-ink-3);
 }

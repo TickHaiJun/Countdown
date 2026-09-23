@@ -291,7 +291,7 @@ export function PomodoroTimer() {
                   <span
                     key={item}
                     className={cn(
-                      'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11.5px] leading-none transition-colors',
+                      'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[calc(11.5px*var(--fs-scale))] leading-none transition-colors',
                       active ? 'border-transparent' : 'border-line text-ink-3',
                     )}
                     style={
@@ -324,13 +324,13 @@ export function PomodoroTimer() {
 
             {/* ---------------------------------------- 进度 + 轮次 */}
             <div className="mx-auto mt-8 w-full max-w-xl">
-              <div className="h-[4px] w-full overflow-hidden rounded-full bg-white/[0.07]">
+              <div className="h-[4px] w-full overflow-hidden rounded-full bg-surface-4">
                 <div
                   className="h-full rounded-full transition-[width] duration-1000 ease-linear"
                   style={{ width: `${percent}%`, backgroundColor: meta.color }}
                 />
               </div>
-              <div className="mt-3 flex items-center justify-between text-[12px] text-ink-3">
+              <div className="mt-3 flex items-center justify-between text-[calc(12px*var(--fs-scale))] text-ink-3">
                 <span>
                   {t('pomodoro.round', {
                     n: position,
@@ -354,7 +354,7 @@ export function PomodoroTimer() {
                   backgroundColor="rgba(96,165,250,0.10)"
                   textColor="#f4f4f5"
                   borderColor="rgba(96,165,250,0.35)"
-                  className="cursor-pointer rounded-full [&>div:last-child]:rounded-full [&>div:last-child]:px-7 [&>div:last-child]:py-3 [&>div:last-child]:text-[13.5px]"
+                  className="cursor-pointer rounded-full [&>div:last-child]:rounded-full [&>div:last-child]:px-7 [&>div:last-child]:py-3 [&>div:last-child]:text-[calc(13.5px*var(--fs-scale))]"
                 >
                   <span className="flex items-center gap-2">
                     {running ? (
@@ -410,7 +410,7 @@ export function PomodoroTimer() {
             )}
           >
             <span
-              className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11.5px] leading-none"
+              className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[calc(11.5px*var(--fs-scale))] leading-none"
               style={{
                 backgroundColor: `${meta.color}1f`,
                 borderColor: `${meta.color}59`,
@@ -429,7 +429,7 @@ export function PomodoroTimer() {
                   isFullscreen ? t('pomodoro.exitFullscreen') : t('pomodoro.enterFullscreen')
                 }
                 title={isFullscreen ? t('pomodoro.exitFullscreen') : t('pomodoro.enterFullscreen')}
-                className="grid h-9 w-9 place-items-center rounded-full text-ink-3 transition-colors hover:bg-white/[0.06] hover:text-ink"
+                className="grid h-9 w-9 place-items-center rounded-full text-ink-3 transition-colors hover:bg-surface-3 hover:text-ink"
               >
                 {isFullscreen ? (
                   <Minimize2 size={15} strokeWidth={1.75} />
@@ -452,7 +452,7 @@ export function PomodoroTimer() {
           />
 
           <div className="mt-[clamp(1.5rem,4vh,3rem)] w-[min(760px,84vw)]">
-            <div className="h-[5px] w-full overflow-hidden rounded-full bg-white/[0.08]">
+            <div className="h-[5px] w-full overflow-hidden rounded-full bg-surface-4">
               <div
                 className="h-full rounded-full transition-[width] duration-1000 ease-linear"
                 style={{ width: `${percent}%`, backgroundColor: meta.color }}
@@ -505,7 +505,7 @@ export function PomodoroTimer() {
                 {t('pomodoro.skip')}
               </Button>
             </div>
-            <p className="text-[11.5px] text-ink-3">{t('pomodoro.bigHint')}</p>
+            <p className="text-[calc(11.5px*var(--fs-scale))] text-ink-3">{t('pomodoro.bigHint')}</p>
           </div>
         </div>
       ) : null}
